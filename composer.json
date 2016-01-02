@@ -16,13 +16,15 @@
     },
     "require-dev": {
         "slim/slim": "~3.0",
-        "phpunit/phpunit": "^4.0"
+        "phpunit/phpunit": "^4.0",
+        "scrutinizer/ocular": "~1.1"
     },
     "autoload": {
         "psr-4": {
             "DavidePastore\\Slim\\Validation\\": "src"
         }
     },
+    "license" : "GPL-2.0+",
     "autoload-dev": {
         "psr-4": {
             "DavidePastore\\Slim\\Validation\\Tests\\": "tests"

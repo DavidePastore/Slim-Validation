@@ -7,7 +7,7 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 
 
-A validation library for the Slim Framework
+A validation library for the Slim Framework.
 
 
 [ico-version]: https://img.shields.io/packagist/v/DavidePastore/Slim-Validation.svg?style=flat-square
