@@ -84,7 +84,22 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($validators, $mw->getValidators());
     }
 
-    public function testValidationWithoutErrorsForOptional() {
+    public function testValidationWithoutValidators() {
+        $mw = new Validation();
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+        $errors = array();
+        $validators = [];
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testValidationWithoutErrorsForMandatory() {
         $optionalValidator = v::stringType()->notEmpty();
         $validators = array(
           'optional' => $optionalValidator
@@ -101,7 +116,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($validators, $mw->getValidators());
     }
 
-    public function testValidationWithErrorsForOptional() {
+    public function testValidationWithErrorsForMandatory() {
         $optionalValidator = v::stringType()->notEmpty()->length(1, 4);
         $validators = array(
           'optional' => $optionalValidator
