@@ -1,4 +1,5 @@
 <?php
+
 namespace DavidePastore\Slim\Validation;
 
 use Respect\Validation\Exceptions\NestedValidationException;
@@ -8,7 +9,6 @@ use Respect\Validation\Exceptions\NestedValidationException;
  */
 class Validation
 {
-
     /**
      * Validators.
      *
@@ -31,10 +31,10 @@ class Validation
     protected $errors = [];
 
     /**
-     * Create new Validator service provider
+     * Create new Validator service provider.
      *
      * @param null|array|ArrayAccess $validators
-     * @param null|callable $translator
+     * @param null|callable          $translator
      */
     public function __construct($validators = null, $translator = null)
     {
@@ -48,11 +48,11 @@ class Validation
     }
 
     /**
-     * Validation middleware invokable class
+     * Validation middleware invokable class.
      *
-     * @param  \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
-     * @param  \Psr\Http\Message\ResponseInterface      $response PSR7 response
-     * @param  callable                                 $next     Next middleware
+     * @param \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
+     * @param \Psr\Http\Message\ResponseInterface      $response PSR7 response
+     * @param callable                                 $next     Next middleware
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
@@ -62,15 +62,15 @@ class Validation
 
         //Validate every parameters in the validators array
         foreach ($this->validators as $key => $validator) {
-          $param = $request->getParam($key);
-          try {
-              $validator->assert($param);
-          } catch(NestedValidationException $exception) {
-              if($this->translator){
-                  $exception->setParam('translator', $this->translator);
-              }
-              $this->errors[$key] = $exception->getMessages();
-          }
+            $param = $request->getParam($key);
+            try {
+                $validator->assert($param);
+            } catch (NestedValidationException $exception) {
+                if ($this->translator) {
+                    $exception->setParam('translator', $this->translator);
+                }
+                $this->errors[$key] = $exception->getMessages();
+            }
         }
 
         return $next($request, $response);
@@ -78,49 +78,61 @@ class Validation
 
     /**
      * Check if there are any errors.
-     * @return boolean
+     *
+     * @return bool
      */
-    public function hasErrors(){
+    public function hasErrors()
+    {
         return !empty($this->errors);
     }
 
     /**
      * Get errors.
+     *
      * @return array The errors array.
      */
-    public function getErrors(){
-      return $this->errors;
+    public function getErrors()
+    {
+        return $this->errors;
     }
 
     /**
      * Get validators.
+     *
      * @return array The validators array.
      */
-    public function getValidators(){
-      return $this->validators;
+    public function getValidators()
+    {
+        return $this->validators;
     }
 
     /**
      * Set validators.
+     *
      * @param array $validators The validators array.
      */
-    public function setValidators($validators){
-      $this->validators = $validators;
+    public function setValidators($validators)
+    {
+        $this->validators = $validators;
     }
 
     /**
      * Get translator.
+     *
      * @return callable The translator.
      */
-    public function getTranslator(){
-      return $this->translator;
+    public function getTranslator()
+    {
+        return $this->translator;
     }
 
     /**
      * Set translator.
+     *
      * @param callable $translator The translator.
      */
-    public function setTranslator($translator){
-      $this->translator = $translator;
+    public function setTranslator($translator)
+    {
+        $this->translator = $translator;
     }
 }
