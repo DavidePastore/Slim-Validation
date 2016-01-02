@@ -1,4 +1,4 @@
-# Slim-Validation
+# Slim Framework Validation
 
 [![Latest version][ico-version]][link-packagist]
 [![Build Status][ico-travis]][link-travis]
