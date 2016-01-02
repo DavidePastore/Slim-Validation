@@ -84,6 +84,48 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($validators, $mw->getValidators());
     }
 
+    public function testValidationNotExistingOptionalParameter()
+    {
+        $notExistingValidator = v::optional(v::alpha());
+        $validators = array(
+          'notExisting' => $notExistingValidator,
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array();
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($errors, $mw->getErrors());
+    }
+
+    public function testValidationNotExistingParameter()
+    {
+        $notExistingValidator = v::alpha();
+        $validators = array(
+          'notExisting' => $notExistingValidator,
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array(
+          'notExisting' => array(
+            'null must contain only letters (a-z)',
+          ),
+        );
+        $this->assertTrue($mw->hasErrors());
+        $this->assertEquals($errors, $mw->getErrors());
+    }
+
     public function testValidationWithoutValidators()
     {
         $mw = new Validation();
@@ -96,48 +138,6 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $errors = array();
         $validators = [];
         $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
-    }
-
-    public function testValidationWithoutErrorsForMandatory()
-    {
-        $optionalValidator = v::stringType()->notEmpty();
-        $validators = array(
-          'optional' => $optionalValidator,
-        );
-        $mw = new Validation($validators);
-
-        $next = function ($req, $res) {
-            return $res;
-        };
-
-        $response = $mw($this->request, $this->response, $next);
-
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
-    }
-
-    public function testValidationWithErrorsForMandatory()
-    {
-        $optionalValidator = v::stringType()->notEmpty()->length(1, 4);
-        $validators = array(
-          'optional' => $optionalValidator,
-        );
-        $mw = new Validation($validators);
-
-        $next = function ($req, $res) {
-            return $res;
-        };
-
-        $response = $mw($this->request, $this->response, $next);
-
-        $this->assertTrue($mw->hasErrors());
-        $errors = array(
-          'optional' => array(
-            '"value" must have a length between 1 and 4',
-          ),
-        );
         $this->assertEquals($errors, $mw->getErrors());
         $this->assertEquals($validators, $mw->getValidators());
     }
@@ -160,6 +160,35 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($mw->hasErrors());
         $this->assertEquals(array(), $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testMultipleValidationWithErrors()
+    {
+        $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
+        $ageValidator = v::numeric()->positive()->between(1, 60);
+        $validators = array(
+          'username' => $usernameValidator,
+          'age' => $ageValidator,
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertTrue($mw->hasErrors());
+        $errors = array(
+          'username' => array(
+            '"davidepastore" must have a length between 1 and 5',
+          ),
+          'age' => array(
+            '"89" must be lower than or equals 60',
+          ),
+        );
+        $this->assertEquals($errors, $mw->getErrors());
         $this->assertEquals($validators, $mw->getValidators());
     }
 
@@ -200,35 +229,6 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($mw->hasErrors());
         $this->assertEquals($errors, $mw->getErrors());
         $this->assertEquals($newValidators, $mw->getValidators());
-    }
-
-    public function testMultipleValidationWithErrors()
-    {
-        $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
-        $ageValidator = v::numeric()->positive()->between(1, 60);
-        $validators = array(
-          'username' => $usernameValidator,
-          'age' => $ageValidator,
-        );
-        $mw = new Validation($validators);
-
-        $next = function ($req, $res) {
-            return $res;
-        };
-
-        $response = $mw($this->request, $this->response, $next);
-
-        $this->assertTrue($mw->hasErrors());
-        $errors = array(
-          'username' => array(
-            '"davidepastore" must have a length between 1 and 5',
-          ),
-          'age' => array(
-            '"89" must be lower than or equals 60',
-          ),
-        );
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
     }
 
     public function testValidationWithCallableTranslator()
