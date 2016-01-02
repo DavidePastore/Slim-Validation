@@ -53,6 +53,17 @@ $app->get('/api/myEndPoint',function ($req, $res, $args) {
     if($this->validation->hasErrors()){
       //There are errors, read them
       $errors = $this->getErrors();
+
+      /* $errors contain:
+      array(
+        'username' => array(
+          '"davidepastore" must have a length between 1 and 10',
+        ),
+        'age' => array(
+          '"89" must be lower than or equals 20',
+        ),
+      );
+      */
     } else {
       //No errors
     }
@@ -95,6 +106,17 @@ $app->get('/foo', function ($req, $res, $args) {
   if($this->validation->hasErrors()){
     //There are errors, read them
     $errors = $this->getErrors();
+
+    /* $errors contain:
+    array(
+      'username' => array(
+        '"davidepastore" must have a length between 1 and 10',
+      ),
+      'age' => array(
+        '"89" must be lower than or equals 20',
+      ),
+    );
+    */
   } else {
     //No errors
   }
