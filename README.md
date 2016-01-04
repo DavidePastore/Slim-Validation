@@ -38,8 +38,8 @@ $container = $app->getContainer();
 // Register provider
 $container['apiValidation'] = function () {
   //Create the validators
-  $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
-  $ageValidator = v::numeric()->positive()->between(1, 100);
+  $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
+  $ageValidator = v::numeric()->positive()->between(1, 20);
   $validators = array(
     'username' => $usernameValidator,
     'age' => $ageValidator
@@ -87,8 +87,8 @@ $container = $app->getContainer();
 // Register provider
 $container['validation'] = function () {
   //Create the validators
-  $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
-  $ageValidator = v::numeric()->positive()->between(1, 100);
+  $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
+  $ageValidator = v::numeric()->positive()->between(1, 20);
   $validators = array(
     'username' => $usernameValidator,
     'age' => $ageValidator
@@ -151,8 +151,8 @@ $container = $app->getContainer();
 // Register provider
 $container['validation'] = function () {
   //Create the validators
-  $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
-  $ageValidator = v::numeric()->positive()->between(1, 100);
+  $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
+  $ageValidator = v::numeric()->positive()->between(1, 20);
   $validators = array(
     'username' => $usernameValidator,
     'age' => $ageValidator
