@@ -50,7 +50,7 @@ $container['apiValidation'] = function () {
 
 $app->get('/api/myEndPoint',function ($req, $res, $args) {
     //Here you expect 'username' and 'age' parameters
-    if($this->validation->hasErrors()){
+    if($this->apiValidation->hasErrors()){
       //There are errors, read them
       $errors = $this->getErrors();
 
