@@ -7,7 +7,7 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 
 
-A validation library for the Slim Framework. It internally uses [Respect/Validation](respect-validation).
+A validation library for the Slim Framework. It internally uses [Respect/Validation][respect-validation].
 
 ## Install
 
