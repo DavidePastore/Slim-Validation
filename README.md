@@ -126,7 +126,7 @@ $app->post('/bar', function ($req, $res, $args) {
   //Here you expect 'username' and 'age' parameters
   if($this->validation->hasErrors()){
     //There are errors, read them
-    $errors = $this->->validation->getErrors();
+    $errors = $this->validation->getErrors();
   } else {
     //No errors
   }
