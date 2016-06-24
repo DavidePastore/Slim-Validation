@@ -105,7 +105,7 @@ $app->get('/foo', function ($req, $res, $args) {
   //Here you expect 'username' and 'age' parameters
   if($this->validation->hasErrors()){
     //There are errors, read them
-    $errors = $this->apiValidation->getErrors();
+    $errors = $this->validation->getErrors();
 
     /* $errors contain:
     array(
@@ -126,7 +126,7 @@ $app->post('/bar', function ($req, $res, $args) {
   //Here you expect 'username' and 'age' parameters
   if($this->validation->hasErrors()){
     //There are errors, read them
-    $errors = $this->getErrors();
+    $errors = $this->->validation->getErrors();
   } else {
     //No errors
   }
