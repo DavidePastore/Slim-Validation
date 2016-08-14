@@ -7,6 +7,7 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 
 [![Build Status][ico-phpeye]][link-phpeye]
+[![PSR2 Conformance][ico-styleci]][link-styleci]
 
 A validation library for the Slim Framework. It internally uses [Respect/Validation][respect-validation].
 
@@ -198,6 +199,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/davidepastore/Slim-Validation.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/davidepastore/slim-validation.svg?style=flat-square
 [ico-phpeye]: http://php-eye.com/badge/DavidePastore/Slim-Validation/tested.svg?style=flat-square
+[ico-styleci]: https://styleci.io/repos/48914054/shield
 
 [link-packagist]: https://packagist.org/packages/davidepastore/slim-validation
 [link-travis]: https://travis-ci.org/DavidePastore/Slim-Validation
@@ -205,3 +207,4 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 [link-code-quality]: https://scrutinizer-ci.com/g/DavidePastore/Slim-Validation
 [link-downloads]: https://packagist.org/packages/davidepastore/slim-validation
 [link-phpeye]: http://php-eye.com/package/DavidePastore/Slim-Validation
+[link-styleci]: https://styleci.io/repos/48914054/
