@@ -239,13 +239,13 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
 
         $translator = function ($message) {
-          $messages = [
+            $messages = [
               'These rules must pass for {{name}}' => 'Queste regole devono passare per {{name}}',
               '{{name}} must be a string' => '{{name}} deve essere una stringa',
               '{{name}} must have a length between {{minValue}} and {{maxValue}}' => '{{name}} deve avere una dimensione di caratteri compresa tra {{minValue}} e {{maxValue}}',
           ];
 
-          return $messages[$message];
+            return $messages[$message];
         };
 
         $mw = new Validation($validators, $translator);
@@ -275,13 +275,13 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
 
         $translator = function ($message) {
-          $messages = [
+            $messages = [
               'These rules must pass for {{name}}' => 'Queste regole devono passare per {{name}}',
               '{{name}} must be a string' => '{{name}} deve essere una stringa',
               '{{name}} must have a length between {{minValue}} and {{maxValue}}' => '{{name}} deve avere una dimensione di caratteri compresa tra {{minValue}} e {{maxValue}}',
           ];
 
-          return $messages[$message];
+            return $messages[$message];
         };
 
         $mw = new Validation($validators, $translator);
@@ -291,13 +291,13 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         };
 
         $newTranslator = function ($message) {
-          $messages = [
+            $messages = [
               'These rules must pass for {{name}}' => 'Queste regole devono passare per {{name}} (nuovo)',
               '{{name}} must be a string' => '{{name}} deve essere una stringa (nuovo)',
               '{{name}} must have a length between {{minValue}} and {{maxValue}}' => '{{name}} deve avere una dimensione di caratteri compresa tra {{minValue}} e {{maxValue}} (nuovo)',
           ];
 
-          return $messages[$message];
+            return $messages[$message];
         };
 
         $mw->setTranslator($newTranslator);
