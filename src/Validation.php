@@ -59,21 +59,66 @@ class Validation
     public function __invoke($request, $response, $next)
     {
         $this->errors = [];
-
-        //Validate every parameters in the validators array
-        foreach ($this->validators as $key => $validator) {
-            $param = $request->getParam($key);
-            try {
-                $validator->assert($param);
-            } catch (NestedValidationException $exception) {
-                if ($this->translator) {
-                    $exception->setParam('translator', $this->translator);
-                }
-                $this->errors[$key] = $exception->getMessages();
-            }
-        }
+        $params = $request->getParams();
+        $this->validate($params, $this->validators);
 
         return $next($request, $response);
+    }
+
+    /**
+     * Validate the parameters by the given params, validators and actual keys.
+     * This method populates the $errors attribute.
+     *
+     * @param array $params     The array of parameters.
+     * @param array $validators The array of validators.
+     * @param array $actualKeys An array that will save all the keys of the tree to retrieve the correct value.
+     */
+    private function validate($params = [], $validators = [], $actualKeys = [])
+    {
+        //Validate every parameters in the validators array
+      foreach ($validators as $key => $validator) {
+          $actualKeys[] = $key;
+          $param = $this->getNestedParam($params, $actualKeys);
+          if (is_array($validator)) {
+              $this->validate($params, $validator, $actualKeys);
+          } else {
+              try {
+                  $validator->assert($param);
+              } catch (NestedValidationException $exception) {
+                  if ($this->translator) {
+                      $exception->setParam('translator', $this->translator);
+                  }
+                  $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
+              }
+          }
+
+          //Remove the key added in this foreach
+          array_pop($actualKeys);
+      }
+    }
+
+    /**
+     * Get the nested parameter value.
+     *
+     * @param array $params An array that represents the values of the parameters.
+     * @param array $keys   An array that represents the tree of keys to use.
+     *
+     * @return mixed The nested parameter value by the given params and tree of keys.
+     */
+    private function getNestedParam($params = [], $keys = [])
+    {
+        if (empty($keys)) {
+            return $params;
+        } else {
+            $firstKey = array_shift($keys);
+            if (array_key_exists($firstKey, $params)) {
+                $paramValue = $params[$firstKey];
+
+                return $this->getNestedParam($paramValue, $keys);
+            } else {
+                return;
+            }
+        }
     }
 
     /**
