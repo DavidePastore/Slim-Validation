@@ -137,6 +137,66 @@ $app->post('/bar', function ($req, $res, $args) {
 $app->run();
 ```
 
+## JSON requests
+
+You can also validate a JSON request. Let's say your body request is:
+
+```json
+{
+	"type": "emails",
+	"objectid": "1",
+	"email": {
+		"id": 1,
+		"enable_mapping": "1",
+		"name": "rq3r",
+		"created_at": "2016-08-23 13:36:29",
+		"updated_at": "2016-08-23 14:36:47"
+	}
+}
+```
+
+and you want to validate the `email.name` key. You can do it in this way:
+
+```php
+use Respect\Validation\Validator as v;
+
+$app = new \Slim\App();
+
+// Fetch DI Container
+$container = $app->getContainer();
+$container['apiValidation'] = function () {
+  //Create the validators
+  $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
+  $emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
+  $validators = array(
+    'type' => $typeValidator,
+    'email' => array(
+      'name' => $emailNameValidator,
+    ),
+  );
+
+  return new \DavidePastore\Slim\Validation\Validation($validators);
+};
+```
+
+If you'll have an error, the result would be:
+
+```php
+//In your route
+$errors = $this->apiValidation->getErrors();
+
+print_r($errors);
+/*
+Array
+(
+    [email.name] => Array
+        (
+            [0] => "rq3r" must have a length between 1 and 2
+        )
+
+)
+*/
+```
 
 ## Translate errors
 
