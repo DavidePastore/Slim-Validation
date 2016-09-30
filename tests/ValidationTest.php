@@ -6,6 +6,7 @@ use Slim\Http\Body;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
+use Slim\Http\RequestBody;
 use Slim\Http\Response;
 use Slim\Http\Uri;
 use DavidePastore\Slim\Validation\Validation;
@@ -39,6 +40,29 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $serverParams = $env->all();
         $body = new Body(fopen('php://temp', 'r+'));
         $this->request = new Request('GET', $uri, $headers, $cookies, $serverParams, $body);
+        $this->response = new Response();
+    }
+
+    /**
+     * Setup for the POST requests.
+     *
+     * @param array $json The JSON to use to mock the body of the request.
+     */
+    public function setUpPost($json)
+    {
+        $uri = Uri::createFromString('https://example.com:443/foo');
+        $headers = new Headers();
+        $headers->set('Content-Type', 'application/json;charset=utf8');
+        $cookies = [];
+        $env = Environment::mock([
+            'SCRIPT_NAME' => '/index.php',
+            'REQUEST_URI' => '/foo',
+            'REQUEST_METHOD' => 'POST',
+        ]);
+        $serverParams = $env->all();
+        $body = new RequestBody();
+        $body->write(json_encode($json));
+        $this->request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
         $this->response = new Response();
     }
 
@@ -313,5 +337,214 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($errors, $mw->getErrors());
         $this->assertEquals($validators, $mw->getValidators());
         $this->assertEquals($newTranslator, $mw->getTranslator());
+    }
+
+    public function testJsonValidationWithoutErrors()
+    {
+        $json = array(
+          'username' => 'jsonusername',
+        );
+        $this->setUpPost($json);
+        $usernameValidator = v::alnum()->noWhitespace()->length(1, 15);
+        $validators = array(
+          'username' => $usernameValidator,
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testJsonValidationWithErrors()
+    {
+        $json = array(
+          'username' => 'jsonusername',
+        );
+        $this->setUpPost($json);
+        $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
+        $validators = array(
+          'username' => $usernameValidator,
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array(
+          'username' => array(
+            '"jsonusername" must have a length between 1 and 5',
+          ),
+        );
+
+        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testComplexJsonValidationWithoutErrors()
+    {
+        $json = array(
+          'type' => 'emails',
+          'objectid' => '1',
+          'email' => array(
+            'id' => 1,
+            'enable_mapping' => '1',
+            'name' => 'rq3r',
+            'created_at' => '2016-08-23 13:36:29',
+            'updated_at' => '2016-08-23 14:36:47',
+          ),
+        );
+        $this->setUpPost($json);
+        $typeValidator = v::alnum()->noWhitespace()->length(3, 8);
+        $emailNameValidator = v::alnum()->noWhitespace()->length(1, 5);
+        $emailIdValidator = v::numeric()->positive()->between(1, 20);
+        $validators = array(
+          'type' => $typeValidator,
+          'email' => array(
+            'id' => $emailIdValidator,
+            'name' => $emailNameValidator,
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testComplexJsonValidationWithErrors()
+    {
+        $json = array(
+          'type' => 'emails',
+          'objectid' => '1',
+          'email' => array(
+            'id' => 1,
+            'enable_mapping' => '1',
+            'name' => 'rq3r',
+            'created_at' => '2016-08-23 13:36:29',
+            'updated_at' => '2016-08-23 14:36:47',
+          ),
+        );
+        $this->setUpPost($json);
+        $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
+        $emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
+        $validators = array(
+          'type' => $typeValidator,
+          'email' => array(
+            'name' => $emailNameValidator,
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array(
+          'type' => array(
+            '"emails" must have a length between 3 and 5',
+          ),
+          'email.name' => array(
+            '"rq3r" must have a length between 1 and 2',
+          ),
+        );
+
+        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testMoreComplexJsonValidationWithoutErrors()
+    {
+        $json = array(
+          'finally' => 'notvalid',
+          'email' => array(
+            'finally' => 'notvalid',
+            'sub' => array(
+              'finally' => 'notvalid',
+              'sub-sub' => array(
+                'finally' => 123,
+              ),
+            ),
+          ),
+        );
+        $this->setUpPost($json);
+        $finallyValidator = v::numeric()->positive()->between(1, 200);
+        $validators = array(
+          'email' => array(
+            'sub' => array(
+              'sub-sub' => array(
+                'finally' => $finallyValidator,
+              ),
+            ),
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testMoreComplexJsonValidationWithErrors()
+    {
+        $json = array(
+        'finally' => 22,
+        'email' => array(
+          'finally' => 33,
+          'sub' => array(
+            'finally' => 97,
+            'sub-sub' => array(
+              'finally' => 321,
+            ),
+          ),
+        ),
+      );
+        $this->setUpPost($json);
+        $finallyValidator = v::numeric()->positive()->between(1, 200);
+        $validators = array(
+          'email' => array(
+            'sub' => array(
+              'sub-sub' => array(
+                'finally' => $finallyValidator,
+              ),
+            ),
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array(
+          'email.sub.sub-sub.finally' => array(
+            '321 must be lower than or equals 200',
+          ),
+        );
+
+        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
     }
 }
