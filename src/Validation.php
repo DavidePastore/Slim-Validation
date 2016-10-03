@@ -112,6 +112,7 @@ class Validation
         } else {
             $firstKey = array_shift($keys);
             if (array_key_exists($firstKey, $params)) {
+                $params = (array)$params;
                 $paramValue = $params[$firstKey];
 
                 return $this->getNestedParam($paramValue, $keys);
