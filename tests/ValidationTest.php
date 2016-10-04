@@ -768,7 +768,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
         $errors = array(
           'email.sub.sub-sub.finally' => array(
-            '321 must be lower than or equals 200',
+            '"321" must be lower than or equals 200',
           ),
         );
 
