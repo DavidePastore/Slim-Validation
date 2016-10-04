@@ -736,17 +736,17 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
     public function testMoreComplexXmlValidationWithErrors()
     {
         $xml = '<person>
-        <finally>22</finally>
-        <email>
-          <finally>33</finally>
-          <sub>
-            <finally>97</finally>
-            <sub-sub>
-              <finally>321</finally>
-            </sub-sub>
-          </sub>
-        </email>
-      </person>';
+          <finally>22</finally>
+          <email>
+            <finally>33</finally>
+            <sub>
+              <finally>97</finally>
+              <sub-sub>
+                <finally>321</finally>
+              </sub-sub>
+            </sub>
+          </email>
+        </person>';
         $this->setUpXmlPost($xml);
         $finallyValidator = v::numeric()->positive()->between(1, 200);
         $validators = array(
