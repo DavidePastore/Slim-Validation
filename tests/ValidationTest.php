@@ -66,6 +66,29 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->response = new Response();
     }
 
+    /**
+     * Setup for the XML POST requests.
+     *
+     * @param string $xml The XML to use to mock the body of the request.
+     */
+    public function setUpXmlPost($xml)
+    {
+        $uri = Uri::createFromString('https://example.com:443/foo');
+        $headers = new Headers();
+        $headers->set('Content-Type', 'application/xml;charset=utf8');
+        $cookies = [];
+        $env = Environment::mock([
+            'SCRIPT_NAME' => '/index.php',
+            'REQUEST_URI' => '/foo',
+            'REQUEST_METHOD' => 'POST',
+        ]);
+        $serverParams = $env->all();
+        $body = new RequestBody();
+        $body->write($xml);
+        $this->request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
+        $this->response = new Response();
+    }
+
     public function testValidationWithoutErrors()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 15);
@@ -541,6 +564,211 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $errors = array(
           'email.sub.sub-sub.finally' => array(
             '321 must be lower than or equals 200',
+          ),
+        );
+
+        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testXmlValidationWithoutErrors()
+    {
+        $xml = '<person><name>Josh</name></person>';
+        $this->setUpXmlPost($xml);
+        $nameValidator = v::alnum()->noWhitespace()->length(1, 15);
+        $validators = array(
+          'name' => $nameValidator,
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testXmlValidationWithErrors()
+    {
+        $xml = '<person><name>jsonusername</name></person>';
+        $this->setUpXmlPost($xml);
+        $nameValidator = v::alnum()->noWhitespace()->length(1, 5);
+        $validators = array(
+          'name' => $nameValidator,
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array(
+          'name' => array(
+            '"jsonusername" must have a length between 1 and 5',
+          ),
+        );
+
+        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testComplexXmlValidationWithoutErrors()
+    {
+        $xml = '<person>
+          <type>emails</type>
+          <objectid>1</objectid>
+          <email>
+            <id>1</id>
+            <enable_mapping>1</enable_mapping>
+            <name>rq3r</name>
+            <created_at>2016-08-23 13:36:29</created_at>
+            <updated_at>2016-08-23 14:36:47</updated_at>
+          </email>
+        </person>';
+        $this->setUpXmlPost($xml);
+        $typeValidator = v::alnum()->noWhitespace()->length(3, 8);
+        $emailNameValidator = v::alnum()->noWhitespace()->length(1, 5);
+        $emailIdValidator = v::numeric()->positive()->between(1, 20);
+        $validators = array(
+          'type' => $typeValidator,
+          'email' => array(
+            'id' => $emailIdValidator,
+            'name' => $emailNameValidator,
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testComplexXmlValidationWithErrors()
+    {
+        $xml = '<person>
+          <type>emails</type>
+          <objectid>1</objectid>
+          <email>
+            <id>1</id>
+            <enable_mapping>1</enable_mapping>
+            <name>rq3r</name>
+            <created_at>2016-08-23 13:36:29</created_at>
+            <updated_at>2016-08-23 14:36:47</updated_at>
+          </email>
+        </person>';
+        $this->setUpXmlPost($xml);
+        $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
+        $emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
+        $validators = array(
+          'type' => $typeValidator,
+          'email' => array(
+            'name' => $emailNameValidator,
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array(
+          'type' => array(
+            '"emails" must have a length between 3 and 5',
+          ),
+          'email.name' => array(
+            '"rq3r" must have a length between 1 and 2',
+          ),
+        );
+
+        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testMoreComplexXmlValidationWithoutErrors()
+    {
+        $xml = '<person>
+          <finally>notvalid</finally>
+          <email>
+            <finally>notvalid</finally>
+            <sub>
+              <finally>notvalid</finally>
+              <sub-sub>
+                <finally>123</finally>
+              </sub-sub>
+            </sub>
+          </email>
+        </person>';
+        $this->setUpXmlPost($xml);
+        $finallyValidator = v::numeric()->positive()->between(1, 200);
+        $validators = array(
+          'email' => array(
+            'sub' => array(
+              'sub-sub' => array(
+                'finally' => $finallyValidator,
+              ),
+            ),
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertFalse($mw->hasErrors());
+        $this->assertEquals($validators, $mw->getValidators());
+    }
+
+    public function testMoreComplexXmlValidationWithErrors()
+    {
+        $xml = '<person>
+          <finally>22</finally>
+          <email>
+            <finally>33</finally>
+            <sub>
+              <finally>97</finally>
+              <sub-sub>
+                <finally>321</finally>
+              </sub-sub>
+            </sub>
+          </email>
+        </person>';
+        $this->setUpXmlPost($xml);
+        $finallyValidator = v::numeric()->positive()->between(1, 200);
+        $validators = array(
+          'email' => array(
+            'sub' => array(
+              'sub-sub' => array(
+                'finally' => $finallyValidator,
+              ),
+            ),
+          ),
+        );
+        $mw = new Validation($validators);
+
+        $next = function ($req, $res) {
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $errors = array(
+          'email.sub.sub-sub.finally' => array(
+            '"321" must be lower than or equals 200',
           ),
         );
 
