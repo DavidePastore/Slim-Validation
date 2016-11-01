@@ -97,38 +97,50 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
         $mw = new Validation($validators);
 
-        $next = function ($req, $res) {
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$hasErrors, &$validators) {
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($validators, $validators);
     }
 
     public function testValidationWithErrors()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertTrue($mw->hasErrors());
-        $errors = array(
+        $this->assertTrue($hasErrors);
+        $expectedErrors = array(
           'username' => array(
             '"davidepastore" must have a length between 1 and 5',
           ),
         );
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testValidationNotExistingOptionalParameter()
@@ -139,15 +151,22 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
         $mw = new Validation($validators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array();
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($errors, $mw->getErrors());
+        $expectedErrors = array();
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedErrors, $errors);
     }
 
     public function testValidationNotExistingParameter()
@@ -158,76 +177,104 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
         $mw = new Validation($validators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'notExisting' => array(
             'null must contain only letters (a-z)',
           ),
         );
-        $this->assertTrue($mw->hasErrors());
-        $this->assertEquals($errors, $mw->getErrors());
+        $this->assertTrue($hasErrors);
+        $this->assertEquals($expectedErrors, $errors);
     }
 
     public function testValidationWithoutValidators()
     {
         $mw = new Validation();
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
-        $errors = array();
-        $validators = [];
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $expectedErrors = array();
+        $expectedValidators = [];
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testMultipleValidationWithoutErrors()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
         $ageValidator = v::numeric()->positive()->between(1, 100);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
           'age' => $ageValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals(array(), $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals(array(), $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testMultipleValidationWithErrors()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
         $ageValidator = v::numeric()->positive()->between(1, 60);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
           'age' => $ageValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertTrue($mw->hasErrors());
-        $errors = array(
+        $this->assertTrue($hasErrors);
+        $expectedErrors = array(
           'username' => array(
             '"davidepastore" must have a length between 1 and 5',
           ),
@@ -235,21 +282,28 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             '"89" must be lower than or equals 60',
           ),
         );
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testSetValidators()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
         $ageValidator = v::numeric()->positive()->between(1, 100);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
           'age' => $ageValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
@@ -264,7 +318,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'username' => array(
             '"davidepastore" must have a length between 1 and 10',
           ),
@@ -273,19 +327,19 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
           ),
         );
 
-        $this->assertTrue($mw->hasErrors());
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($newValidators, $mw->getValidators());
+        $this->assertTrue($hasErrors);
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($newValidators, $validators);
     }
 
     public function testValidationWithCallableTranslator()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
         );
 
-        $translator = function ($message) {
+        $expectedTranslator = function ($message) {
             $messages = [
               'These rules must pass for {{name}}' => 'Queste regole devono passare per {{name}}',
               '{{name}} must be a string' => '{{name}} deve essere una stringa',
@@ -295,29 +349,38 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             return $messages[$message];
         };
 
-        $mw = new Validation($validators, $translator);
+        $mw = new Validation($expectedValidators, $expectedTranslator);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $translator = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$translator, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+            $translator = $req->getAttribute('translator');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertTrue($mw->hasErrors());
-        $errors = array(
+        $this->assertTrue($hasErrors);
+        $expectedErrors = array(
           'username' => array(
             '"davidepastore" deve avere una dimensione di caratteri compresa tra 1 e 5',
           ),
         );
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
-        $this->assertEquals($translator, $mw->getTranslator());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
+        $this->assertEquals($expectedTranslator, $translator);
     }
 
     public function testSetTranslator()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
         );
 
@@ -331,9 +394,18 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             return $messages[$message];
         };
 
-        $mw = new Validation($validators, $translator);
+        $mw = new Validation($expectedValidators, $translator);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $translator = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$translator, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+            $translator = $req->getAttribute('translator');
+
             return $res;
         };
 
@@ -351,15 +423,15 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertTrue($mw->hasErrors());
-        $errors = array(
+        $this->assertTrue($hasErrors);
+        $expectedErrors = array(
           'username' => array(
             '"davidepastore" deve avere una dimensione di caratteri compresa tra 1 e 5 (nuovo)',
           ),
         );
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
-        $this->assertEquals($newTranslator, $mw->getTranslator());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
+        $this->assertEquals($newTranslator, $translator);
     }
 
     public function testJsonValidationWithoutErrors()
@@ -369,19 +441,24 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
         $this->setUpPost($json);
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 15);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$hasErrors, &$validators) {
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testJsonValidationWithErrors()
@@ -391,25 +468,32 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
         $this->setUpPost($json);
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
-        $validators = array(
+        $expectedValidators = array(
           'username' => $usernameValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'username' => array(
             '"jsonusername" must have a length between 1 and 5',
           ),
         );
 
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testComplexJsonValidationWithoutErrors()
@@ -429,23 +513,30 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $typeValidator = v::alnum()->noWhitespace()->length(3, 8);
         $emailNameValidator = v::alnum()->noWhitespace()->length(1, 5);
         $emailIdValidator = v::numeric()->positive()->between(1, 20);
-        $validators = array(
+        $expectedValidators = array(
           'type' => $typeValidator,
           'email' => array(
             'id' => $emailIdValidator,
             'name' => $emailNameValidator,
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testComplexJsonValidationWithErrors()
@@ -464,21 +555,28 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->setUpPost($json);
         $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
         $emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
-        $validators = array(
+        $expectedValidators = array(
           'type' => $typeValidator,
           'email' => array(
             'name' => $emailNameValidator,
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'type' => array(
             '"emails" must have a length between 3 and 5',
           ),
@@ -487,8 +585,8 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
           ),
         );
 
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testMoreComplexJsonValidationWithoutErrors()
@@ -507,7 +605,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
         $this->setUpPost($json);
         $finallyValidator = v::numeric()->positive()->between(1, 200);
-        $validators = array(
+        $expectedValidators = array(
           'email' => array(
             'sub' => array(
               'sub-sub' => array(
@@ -516,35 +614,40 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ),
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$hasErrors, &$validators) {
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testMoreComplexJsonValidationWithErrors()
     {
         $json = array(
-        'finally' => 22,
-        'email' => array(
-          'finally' => 33,
-          'sub' => array(
-            'finally' => 97,
-            'sub-sub' => array(
-              'finally' => 321,
+          'finally' => 22,
+          'email' => array(
+            'finally' => 33,
+            'sub' => array(
+              'finally' => 97,
+              'sub-sub' => array(
+                'finally' => 321,
+              ),
             ),
           ),
-        ),
-      );
+        );
         $this->setUpPost($json);
         $finallyValidator = v::numeric()->positive()->between(1, 200);
-        $validators = array(
+        $expectedValidators = array(
           'email' => array(
             'sub' => array(
               'sub-sub' => array(
@@ -553,22 +656,27 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ),
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'email.sub.sub-sub.finally' => array(
             '321 must be lower than or equals 200',
           ),
         );
 
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testXmlValidationWithoutErrors()
@@ -576,19 +684,24 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $xml = '<person><name>Josh</name></person>';
         $this->setUpXmlPost($xml);
         $nameValidator = v::alnum()->noWhitespace()->length(1, 15);
-        $validators = array(
+        $expectedValidators = array(
           'name' => $nameValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$hasErrors, &$validators) {
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testXmlValidationWithErrors()
@@ -596,25 +709,30 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $xml = '<person><name>jsonusername</name></person>';
         $this->setUpXmlPost($xml);
         $nameValidator = v::alnum()->noWhitespace()->length(1, 5);
-        $validators = array(
+        $expectedValidators = array(
           'name' => $nameValidator,
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'name' => array(
             '"jsonusername" must have a length between 1 and 5',
           ),
         );
 
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testComplexXmlValidationWithoutErrors()
@@ -634,23 +752,28 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $typeValidator = v::alnum()->noWhitespace()->length(3, 8);
         $emailNameValidator = v::alnum()->noWhitespace()->length(1, 5);
         $emailIdValidator = v::numeric()->positive()->between(1, 20);
-        $validators = array(
+        $expectedValidators = array(
           'type' => $typeValidator,
           'email' => array(
             'id' => $emailIdValidator,
             'name' => $emailNameValidator,
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$hasErrors, &$validators) {
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testComplexXmlValidationWithErrors()
@@ -669,21 +792,26 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->setUpXmlPost($xml);
         $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
         $emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
-        $validators = array(
+        $expectedValidators = array(
           'type' => $typeValidator,
           'email' => array(
             'name' => $emailNameValidator,
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'type' => array(
             '"emails" must have a length between 3 and 5',
           ),
@@ -692,8 +820,8 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
           ),
         );
 
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testMoreComplexXmlValidationWithoutErrors()
@@ -712,7 +840,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         </person>';
         $this->setUpXmlPost($xml);
         $finallyValidator = v::numeric()->positive()->between(1, 200);
-        $validators = array(
+        $expectedValidators = array(
           'email' => array(
             'sub' => array(
               'sub-sub' => array(
@@ -721,16 +849,21 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ),
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$hasErrors, &$validators) {
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $this->assertFalse($mw->hasErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertFalse($hasErrors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 
     public function testMoreComplexXmlValidationWithErrors()
@@ -749,7 +882,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         </person>';
         $this->setUpXmlPost($xml);
         $finallyValidator = v::numeric()->positive()->between(1, 200);
-        $validators = array(
+        $expectedValidators = array(
           'email' => array(
             'sub' => array(
               'sub-sub' => array(
@@ -758,21 +891,26 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ),
           ),
         );
-        $mw = new Validation($validators);
+        $mw = new Validation($expectedValidators);
 
-        $next = function ($req, $res) {
+        $errors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $validators = $req->getAttribute('validators');
+
             return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
 
-        $errors = array(
+        $expectedErrors = array(
           'email.sub.sub-sub.finally' => array(
             '"321" must be lower than or equals 200',
           ),
         );
 
-        $this->assertEquals($errors, $mw->getErrors());
-        $this->assertEquals($validators, $mw->getValidators());
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals($expectedValidators, $validators);
     }
 }
