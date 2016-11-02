@@ -34,27 +34,19 @@ use Respect\Validation\Validator as v;
 
 $app = new \Slim\App();
 
-// Fetch DI Container
-$container = $app->getContainer();
-
-// Register provider
-$container['apiValidation'] = function () {
-  //Create the validators
-  $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
-  $ageValidator = v::numeric()->positive()->between(1, 20);
-  $validators = array(
-    'username' => $usernameValidator,
-    'age' => $ageValidator
-  );
-
-  return new \DavidePastore\Slim\Validation\Validation($validators);
-};
+//Create the validators
+$usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
+$ageValidator = v::numeric()->positive()->between(1, 20);
+$validators = array(
+  'username' => $usernameValidator,
+  'age' => $ageValidator
+);
 
 $app->get('/api/myEndPoint',function ($req, $res, $args) {
     //Here you expect 'username' and 'age' parameters
-    if($this->apiValidation->hasErrors()){
+    if($req->getAttribute('has_errors')){
       //There are errors, read them
-      $errors = $this->apiValidation->getErrors();
+      $errors = $req->getAttribute('errors');
 
       /* $errors contain:
       array(
@@ -70,7 +62,7 @@ $app->get('/api/myEndPoint',function ($req, $res, $args) {
       //No errors
     }
 
-})->add($container->get('apiValidation'));
+})->add(new \DavidePastore\Slim\Validation\Validation($validators));
 
 $app->run();
 ```
@@ -83,31 +75,23 @@ use Respect\Validation\Validator as v;
 
 $app = new \Slim\App();
 
-// Fetch DI Container
-$container = $app->getContainer();
-
-// Register provider
-$container['validation'] = function () {
-  //Create the validators
-  $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
-  $ageValidator = v::numeric()->positive()->between(1, 20);
-  $validators = array(
-    'username' => $usernameValidator,
-    'age' => $ageValidator
-  );
-
-  return new \DavidePastore\Slim\Validation\Validation($validators);
-};
+//Create the validators
+$usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
+$ageValidator = v::numeric()->positive()->between(1, 20);
+$validators = array(
+  'username' => $usernameValidator,
+  'age' => $ageValidator
+);
 
 // Register middleware for all routes
 // If you are implementing per-route checks you must not add this
-$app->add($container->get('validation'));
+$app->add(return new \DavidePastore\Slim\Validation\Validation($validators));
 
 $app->get('/foo', function ($req, $res, $args) {
   //Here you expect 'username' and 'age' parameters
-  if($this->validation->hasErrors()){
+  if($req->getAttribute('has_errors')){
     //There are errors, read them
-    $errors = $this->validation->getErrors();
+    $errors = $req->getAttribute('errors');
 
     /* $errors contain:
     array(
@@ -126,9 +110,9 @@ $app->get('/foo', function ($req, $res, $args) {
 
 $app->post('/bar', function ($req, $res, $args) {
   //Here you expect 'username' and 'age' parameters
-  if($this->validation->hasErrors()){
+  if($req->getAttribute('has_errors')){
     //There are errors, read them
-    $errors = $this->validation->getErrors();
+    $errors = $req->getAttribute('errors');
   } else {
     //No errors
   }
@@ -162,28 +146,22 @@ use Respect\Validation\Validator as v;
 
 $app = new \Slim\App();
 
-// Fetch DI Container
-$container = $app->getContainer();
-$container['apiValidation'] = function () {
-  //Create the validators
-  $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
-  $emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
-  $validators = array(
-    'type' => $typeValidator,
-    'email' => array(
-      'name' => $emailNameValidator,
-    ),
-  );
-
-  return new \DavidePastore\Slim\Validation\Validation($validators);
-};
+//Create the validators
+$typeValidator = v::alnum()->noWhitespace()->length(3, 5);
+$emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
+$validators = array(
+  'type' => $typeValidator,
+  'email' => array(
+    'name' => $emailNameValidator,
+  ),
+);
 ```
 
 If you'll have an error, the result would be:
 
 ```php
 //In your route
-$errors = $this->apiValidation->getErrors();
+$errors = $req->getAttribute('errors');
 
 print_r($errors);
 /*
@@ -225,21 +203,15 @@ use Respect\Validation\Validator as v;
 
 $app = new \Slim\App();
 
-// Fetch DI Container
-$container = $app->getContainer();
-$container['apiValidation'] = function () {
-  //Create the validators
-  $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
-  $emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
-  $validators = array(
-    'type' => $typeValidator,
-    'email' => array(
-      'name' => $emailNameValidator,
-    ),
-  );
-
-  return new \DavidePastore\Slim\Validation\Validation($validators);
-};
+//Create the validators
+$typeValidator = v::alnum()->noWhitespace()->length(3, 5);
+$emailNameValidator = v::alnum()->noWhitespace()->length(1, 2);
+$validators = array(
+  'type' => $typeValidator,
+  'email' => array(
+    'name' => $emailNameValidator,
+  ),
+);
 ```
 
 
@@ -247,7 +219,7 @@ If you'll have an error, the result would be:
 
 ```php
 //In your route
-$errors = $this->apiValidation->getErrors();
+$errors = $req->getAttribute('errors');
 
 print_r($errors);
 /*
@@ -272,30 +244,24 @@ use Respect\Validation\Validator as v;
 
 $app = new \Slim\App();
 
-// Fetch DI Container
-$container = $app->getContainer();
+//Create the validators
+$usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
+$ageValidator = v::numeric()->positive()->between(1, 20);
+$validators = array(
+  'username' => $usernameValidator,
+  'age' => $ageValidator
+);
 
-// Register provider
-$container['validation'] = function () {
-  //Create the validators
-  $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
-  $ageValidator = v::numeric()->positive()->between(1, 20);
-  $validators = array(
-    'username' => $usernameValidator,
-    'age' => $ageValidator
-  );
-
-  $translator = function($message){
-    $messages = [
-        'These rules must pass for {{name}}' => 'Queste regole devono passare per {{name}}',
-        '{{name}} must be a string' => '{{name}} deve essere una stringa',
-        '{{name}} must have a length between {{minValue}} and {{maxValue}}' => '{{name}} deve avere una dimensione di caratteri compresa tra {{minValue}} e {{maxValue}}',
-    ];
-    return $messages[$message];
-  };
-
-  return new \DavidePastore\Slim\Validation\Validation($validators, $translator);
+$translator = function($message){
+  $messages = [
+      'These rules must pass for {{name}}' => 'Queste regole devono passare per {{name}}',
+      '{{name}} must be a string' => '{{name}} deve essere una stringa',
+      '{{name}} must have a length between {{minValue}} and {{maxValue}}' => '{{name}} deve avere una dimensione di caratteri compresa tra {{minValue}} e {{maxValue}}',
+  ];
+  return $messages[$message];
 };
+
+$middleware = new \DavidePastore\Slim\Validation\Validation($validators, $translator);
 
 // Register middleware for all routes or only for one...
 
