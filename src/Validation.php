@@ -31,6 +31,34 @@ class Validation
     protected $errors = [];
 
     /**
+     * The 'errors' attribute name.
+     *
+     * @var string
+     */
+    protected $errors_name = 'errors';
+
+    /**
+     * The 'has_error' attribute name.
+     *
+     * @var string
+     */
+    protected $has_errors_name = 'has_errors';
+
+    /**
+     * The 'validators' attribute name.
+     *
+     * @var string
+     */
+    protected $validators_name = 'validators';
+
+    /**
+     * The 'translator' attribute name.
+     *
+     * @var string
+     */
+    protected $translator_name = 'translator';
+
+    /**
      * Create new Validator service provider.
      *
      * @param null|array|ArrayAccess $validators
@@ -61,6 +89,11 @@ class Validation
         $this->errors = [];
         $params = $request->getParams();
         $this->validate($params, $this->validators);
+
+        $request = $request->withAttribute($this->errors_name, $this->getErrors());
+        $request = $request->withAttribute($this->has_errors_name, $this->hasErrors());
+        $request = $request->withAttribute($this->validators_name, $this->getValidators());
+        $request = $request->withAttribute($this->translator_name, $this->getTranslator());
 
         return $next($request, $response);
     }
