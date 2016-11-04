@@ -85,7 +85,7 @@ $validators = array(
 
 // Register middleware for all routes
 // If you are implementing per-route checks you must not add this
-$app->add(return new \DavidePastore\Slim\Validation\Validation($validators));
+$app->add(new \DavidePastore\Slim\Validation\Validation($validators));
 
 $app->get('/foo', function ($req, $res, $args) {
   //Here you expect 'username' and 'age' parameters
