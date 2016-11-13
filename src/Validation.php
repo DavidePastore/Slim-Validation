@@ -61,13 +61,13 @@ class Validation
     /**
      * Create new Validator service provider.
      *
-     * @param null|array|ArrayAccess $validators
-     * @param null|callable          $translator
+     * @param null|array|\ArrayAccess $validators
+     * @param null|callable           $translator
      */
     public function __construct($validators = null, $translator = null)
     {
         // Set the validators
-        if (is_array($validators) || $validators instanceof ArrayAccess) {
+        if (is_array($validators) || $validators instanceof \ArrayAccess) {
             $this->validators = $validators;
         } elseif (is_null($validators)) {
             $this->validators = [];
