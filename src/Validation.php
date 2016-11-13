@@ -67,7 +67,7 @@ class Validation
     public function __construct($validators = null, $translator = null)
     {
         // Set the validators
-        if (is_array($validators) || $validators instanceof ArrayAccess) {
+        if (is_array($validators) || $validators instanceof \ArrayAccess) {
             $this->validators = $validators;
         } elseif (is_null($validators)) {
             $this->validators = [];
