@@ -118,12 +118,12 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $validators = null;
         $translator = null;
         $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators, &$translator) {
-          $errors = $req->getAttribute('errors');
-          $hasErrors = $req->getAttribute('has_errors');
-          $validators = $req->getAttribute('validators');
-          $translator = $req->getAttribute('translator');
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+            $translator = $req->getAttribute('translator');
 
-          return $res;
+            return $res;
         };
 
         $response = $mw($this->request, $this->response, $next);
