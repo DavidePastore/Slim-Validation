@@ -61,8 +61,8 @@ class Validation
     /**
      * Create new Validator service provider.
      *
-     * @param null|object<ArrayAccess>|\ArrayAccess $validators
-     * @param null|callable                         $translator
+     * @param null|array|\ArrayAccess $validators
+     * @param null|callable           $translator
      */
     public function __construct($validators = null, $translator = null)
     {
