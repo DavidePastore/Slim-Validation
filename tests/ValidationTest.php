@@ -94,17 +94,16 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
      *
      * @dataProvider validationProvider
      */
-    public function testValidation($expectedValidators, $expectedTranslator, $expectedHasErrors, $expectedErrors, $requestType = 'GET', $body)
+    public function testValidation($expectedValidators, $expectedTranslator, $expectedHasErrors, $expectedErrors, $requestType = 'GET', $body = null)
     {
-        echo $requestType."\n";
         if ($requestType === 'GET') {
             $this->setupGet();
         } elseif ($requestType === 'JSON') {
-            print_r($body);
             $this->setupJson($body);
         } elseif ($requestType === 'XML') {
             $this->setupXml($body);
         }
+
         if (is_null($expectedValidators)) {
             $mw = new Validation();
             $expectedValidators = array();
@@ -253,11 +252,287 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               'username' => 'jsonusername',
             ),
           ),
+          //JSON validation with errors
+          array(
+            array(
+              'username' => v::alnum()->noWhitespace()->length(1, 5),
+            ),
+            null,
+            true,
+            array(
+              'username' => array(
+                '"jsonusername" must have a length between 1 and 5',
+              ),
+            ),
+            'JSON',
+            array(
+              'username' => 'jsonusername',
+            ),
+          ),
+          //Complex JSON validation without errors
+          array(
+            array(
+              'type' => v::alnum()->noWhitespace()->length(3, 8),
+              'email' => array(
+                'id' => v::numeric()->positive()->between(1, 20),
+                'name' => v::alnum()->noWhitespace()->length(1, 5),
+              ),
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              'type' => 'emails',
+              'objectid' => '1',
+              'email' => array(
+                'id' => 1,
+                'enable_mapping' => '1',
+                'name' => 'rq3r',
+                'created_at' => '2016-08-23 13:36:29',
+                'updated_at' => '2016-08-23 14:36:47',
+              ),
+            ),
+          ),
+          //Complex JSON validation with errors
+          array(
+            array(
+              'type' => v::alnum()->noWhitespace()->length(3, 5),
+              'email' => array(
+                'name' => v::alnum()->noWhitespace()->length(1, 2),
+              ),
+            ),
+            null,
+            true,
+            array(
+              'type' => array(
+                '"emails" must have a length between 3 and 5',
+              ),
+              'email.name' => array(
+                '"rq3r" must have a length between 1 and 2',
+              ),
+            ),
+            'JSON',
+            array(
+              'type' => 'emails',
+              'objectid' => '1',
+              'email' => array(
+                'id' => 1,
+                'enable_mapping' => '1',
+                'name' => 'rq3r',
+                'created_at' => '2016-08-23 13:36:29',
+                'updated_at' => '2016-08-23 14:36:47',
+              ),
+            ),
+          ),
+          //More complex JSON validation without errors
+          array(
+            array(
+              'email' => array(
+                'sub' => array(
+                  'sub-sub' => array(
+                    'finally' => v::numeric()->positive()->between(1, 200),
+                  ),
+                ),
+              ),
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              'finally' => 'notvalid',
+              'email' => array(
+                'finally' => 'notvalid',
+                'sub' => array(
+                  'finally' => 'notvalid',
+                  'sub-sub' => array(
+                    'finally' => 123,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          //More complex JSON validation with errors
+          array(
+            array(
+              'email' => array(
+                'sub' => array(
+                  'sub-sub' => array(
+                    'finally' => v::numeric()->positive()->between(1, 200),
+                  ),
+                ),
+              ),
+            ),
+            null,
+            true,
+            array(
+              'email.sub.sub-sub.finally' => array(
+                '321 must be lower than or equals 200',
+              ),
+            ),
+            'JSON',
+            array(
+              'finally' => 22,
+              'email' => array(
+                'finally' => 33,
+                'sub' => array(
+                  'finally' => 97,
+                  'sub-sub' => array(
+                    'finally' => 321,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          //XML validation without errors
+          array(
+            array(
+               'name' => v::alnum()->noWhitespace()->length(1, 15),
+            ),
+            null,
+            false,
+            array(),
+            'XML',
+            '<person><name>Josh</name></person>',
+          ),
+          //XML validation with errors
+          array(
+            array(
+               'name' => v::alnum()->noWhitespace()->length(1, 5),
+            ),
+            null,
+            true,
+            array(
+              'name' => array(
+                '"xmlusername" must have a length between 1 and 5',
+              ),
+            ),
+            'XML',
+            '<person><name>xmlusername</name></person>',
+          ),
+          //Complex XML validation without errors
+          array(
+            array(
+              'type' => v::alnum()->noWhitespace()->length(3, 8),
+              'email' => array(
+                'id' => v::numeric()->positive()->between(1, 20),
+                'name' => v::alnum()->noWhitespace()->length(1, 5),
+              ),
+            ),
+            null,
+            false,
+            array(),
+            'XML',
+            '<person>
+              <type>emails</type>
+              <objectid>1</objectid>
+              <email>
+                <id>1</id>
+                <enable_mapping>1</enable_mapping>
+                <name>rq3r</name>
+                <created_at>2016-08-23 13:36:29</created_at>
+                <updated_at>2016-08-23 14:36:47</updated_at>
+              </email>
+            </person>',
+          ),
+          //Complex XML validation with errors
+          array(
+            array(
+              'type' => v::alnum()->noWhitespace()->length(3, 5),
+              'email' => array(
+                'name' => v::alnum()->noWhitespace()->length(1, 2),
+              ),
+            ),
+            null,
+            true,
+            array(
+              'type' => array(
+                '"emails" must have a length between 3 and 5',
+              ),
+              'email.name' => array(
+                '"rq3r" must have a length between 1 and 2',
+              ),
+            ),
+            'XML',
+            '<person>
+              <type>emails</type>
+              <objectid>1</objectid>
+              <email>
+                <id>1</id>
+                <enable_mapping>1</enable_mapping>
+                <name>rq3r</name>
+                <created_at>2016-08-23 13:36:29</created_at>
+                <updated_at>2016-08-23 14:36:47</updated_at>
+              </email>
+            </person>',
+          ),
+          //More complex XML validation without errors
+          array(
+            array(
+              'email' => array(
+                'sub' => array(
+                  'sub-sub' => array(
+                    'finally' => v::numeric()->positive()->between(1, 200),
+                  ),
+                ),
+              ),
+            ),
+            null,
+            false,
+            array(),
+            'XML',
+            '<person>
+              <finally>notvalid</finally>
+              <email>
+                <finally>notvalid</finally>
+                <sub>
+                  <finally>notvalid</finally>
+                  <sub-sub>
+                    <finally>123</finally>
+                  </sub-sub>
+                </sub>
+              </email>
+            </person>',
+          ),
+          //More complex XML validation with errors
+          array(
+            array(
+              'email' => array(
+                'sub' => array(
+                  'sub-sub' => array(
+                    'finally' => v::numeric()->positive()->between(1, 200),
+                  ),
+                ),
+              ),
+            ),
+            null,
+            true,
+            array(
+              'email.sub.sub-sub.finally' => array(
+                '"321" must be lower than or equals 200',
+              ),
+            ),
+            'XML',
+            '<person>
+              <finally>22</finally>
+              <email>
+                <finally>33</finally>
+                <sub>
+                  <finally>97</finally>
+                  <sub-sub>
+                    <finally>321</finally>
+                  </sub-sub>
+                </sub>
+              </email>
+            </person>',
+          ),
       );
     }
 
     public function testSetValidators()
     {
+        $this->setupGet();
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
         $ageValidator = v::numeric()->positive()->between(1, 100);
         $expectedValidators = array(
@@ -304,6 +579,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
     public function testSetTranslator()
     {
+        $this->setupGet();
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
         $expectedValidators = array(
           'username' => $usernameValidator,
