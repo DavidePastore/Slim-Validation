@@ -88,6 +88,8 @@ class Validation
     {
         $this->errors = [];
         $params = $request->getParams();
+        $params = array_merge($request->getAttributes(), $params);
+        //print_r($params);
         $this->validate($params, $this->validators);
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
@@ -112,15 +114,20 @@ class Validation
       foreach ($validators as $key => $validator) {
           $actualKeys[] = $key;
           $param = $this->getNestedParam($params, $actualKeys);
+          print_r($param);
+          echo "\n";
           if (is_array($validator)) {
               $this->validate($params, $validator, $actualKeys);
           } else {
               try {
+                  echo 'Validating...'.$param."\n";
                   $validator->assert($param);
               } catch (NestedValidationException $exception) {
                   if ($this->translator) {
                       $exception->setParam('translator', $this->translator);
                   }
+                  print_r($actualKeys);
+                  echo "\n";
                   $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
               }
           }
