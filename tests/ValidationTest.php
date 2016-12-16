@@ -2,6 +2,8 @@
 
 namespace DavidePastore\Slim\Validation\Tests;
 
+use ReflectionProperty;
+use Slim\Collection;
 use Slim\Http\Body;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
@@ -633,5 +635,85 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedErrors, $errors);
         $this->assertEquals($expectedValidators, $validators);
         $this->assertEquals($newTranslator, $translator);
+    }
+
+    public function requestFactory($envData = [])
+    {
+        $env = Environment::mock($envData);
+        $uri = Uri::createFromString('https://example.com:443/foo/bar?abc=123');
+        $headers = Headers::createFromEnvironment($env);
+        $cookies = [];
+        $serverParams = $env->all();
+        $body = new RequestBody();
+        $request = new Request('GET', $uri, $headers, $cookies, $serverParams, $body);
+
+        return $request;
+    }
+
+    /**
+     * Test for validation.
+     *
+     * @dataProvider routeParamValidationProvider
+     */
+    public function testRouteParamValidation($expectedValidators, $expectedHasErrors, $expectedErrors, $attributes)
+    {
+        $this->setupGet();
+        $attrProp = new ReflectionProperty($this->request, 'attributes');
+        $attrProp->setAccessible(true);
+        $attrProp->setValue($this->request, new Collection(array('routeInfo' => array(
+          0,
+          1,
+          $attributes,
+        ))));
+
+        $mw = new Validation($expectedValidators);
+
+        $errors = null;
+        $hasErrors = null;
+        $validators = [];
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertEquals($expectedValidators, $validators);
+        $this->assertEquals($expectedHasErrors, $hasErrors);
+        $this->assertEquals($expectedErrors, $errors);
+    }
+
+    /**
+     * The validation provider for the route parameters.
+     */
+    public function routeParamValidationProvider()
+    {
+        return array(
+          //Validation without errors
+          array(
+            array(
+              'routeParam' => v::alnum()->noWhitespace()->length(1, 5),
+            ),
+            false,
+            [],
+            ['routeParam' => 'test'],
+          ),
+          //Validation with errors
+          array(
+            array(
+              'routeParam' => v::alnum()->noWhitespace()->length(1, 5),
+            ),
+            true,
+            array(
+              'routeParam' => array(
+                '"davidepastore" must have a length between 1 and 5',
+              ),
+            ),
+            ['routeParam' => 'davidepastore'],
+          ),
+        );
     }
 }

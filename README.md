@@ -121,6 +121,44 @@ $app->post('/bar', function ($req, $res, $args) {
 $app->run();
 ```
 
+
+## Route parameters
+
+```php
+use Respect\Validation\Validator as v;
+
+$app = new \Slim\App();
+
+//Create the validators
+$routeParamValidator = v::numeric()->positive();
+$validators = array(
+  'param' => $routeParamValidator,
+);
+
+$app->get('/foo/{param}', function ($req, $res, $args) {
+  //Here you expect 'param' route parameter
+  if($req->getAttribute('has_errors')){
+    //There are errors, read them
+    $errors = $req->getAttribute('errors');
+
+    /* $errors contain:
+    array(
+        'param' => array(
+          '"wrong" must be numeric',
+        ),
+    );
+    */
+  } else {
+    //No errors
+  }
+})->add(new \DavidePastore\Slim\Validation\Validation($validators));
+
+$app->run();
+```
+
+Note that requests parameters take priority over route parameters, so if you use the same name for a route and request parameter, the last will win and it will be considered for validation.
+
+
 ## JSON requests
 
 You can also validate a JSON request. Let's say your body request is:
@@ -175,6 +213,7 @@ Array
 )
 */
 ```
+
 
 ## XML requests
 
@@ -268,15 +307,18 @@ $middleware = new \DavidePastore\Slim\Validation\Validation($validators, $transl
 $app->run();
 ```
 
+
 ## Testing
 
 ``` bash
 $ phpunit
 ```
 
+
 ## Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
 
 ## Credits
 
