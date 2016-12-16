@@ -11,6 +11,20 @@
 
 A validation library for the Slim Framework. It internally uses [Respect/Validation][respect-validation].
 
+## Table of contents
+
+- [Install](#install)
+- [Usage](#usage)
+  - [Register per route](register-per-route)
+  - [Register for all routes](register-for-all-routes)
+- [Route parameters](route-parameters)
+- [JSON requests](json-requests)
+- [XML requests](xml-requests)
+- [Translate errors](translate-errors)
+- [Testing](testing)
+- [Contributing](contributing)
+- [Credits](credits)
+
 ## Install
 
 Via Composer
