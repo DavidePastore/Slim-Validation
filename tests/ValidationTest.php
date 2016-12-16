@@ -660,7 +660,11 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->setupGet();
         $attrProp = new ReflectionProperty($this->request, 'attributes');
         $attrProp->setAccessible(true);
-        $attrProp->setValue($this->request, new Collection($attributes));
+        $attrProp->setValue($this->request, new Collection(array('routeInfo' => array(
+          0,
+          1,
+          $attributes,
+        )))); //$attributes
 
         $mw = new Validation($expectedValidators);
 
