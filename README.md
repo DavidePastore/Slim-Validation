@@ -11,6 +11,20 @@
 
 A validation library for the Slim Framework. It internally uses [Respect/Validation][respect-validation].
 
+## Table of contents
+
+- [Install](#install)
+- [Usage](#usage)
+  - [Register per route](#register-per-route)
+  - [Register for all routes](#register-for-all-routes)
+  - [Route parameters](#route-parameters)
+  - [JSON requests](#json-requests)
+  - [XML requests](#xml-requests)
+  - [Translate errors](#translate-errors)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [Credits](#credits)
+
 ## Install
 
 Via Composer
@@ -122,7 +136,7 @@ $app->run();
 ```
 
 
-## Route parameters
+### Route parameters
 
 ```php
 use Respect\Validation\Validator as v;
@@ -159,7 +173,7 @@ $app->run();
 Note that requests parameters take priority over route parameters, so if you use the same name for a route and request parameter, the last will win and it will be considered for validation.
 
 
-## JSON requests
+### JSON requests
 
 You can also validate a JSON request. Let's say your body request is:
 
@@ -215,7 +229,7 @@ Array
 ```
 
 
-## XML requests
+### XML requests
 
 You can also validate a XML request. Let's say your body request is:
 
@@ -274,7 +288,7 @@ Array
 ```
 
 
-## Translate errors
+### Translate errors
 
 You can provide a callable function to translate the errors.
 
