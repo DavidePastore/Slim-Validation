@@ -156,6 +156,8 @@ $app->get('/foo/{param}', function ($req, $res, $args) {
 $app->run();
 ```
 
+Note that requests parameters take priority over route parameters, so if you use the same name for a route and request parameter, the last will win and it will be considered for validation.
+
 
 ## JSON requests
 
