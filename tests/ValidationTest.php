@@ -668,12 +668,12 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $hasErrors = null;
         $validators = [];
         $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
-          $errors = $req->getAttribute('errors');
-          $hasErrors = $req->getAttribute('has_errors');
-          $validators = $req->getAttribute('validators');
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
 
-          return $res;
-      };
+            return $res;
+        };
 
         $response = $mw($this->request, $this->response, $next);
 
