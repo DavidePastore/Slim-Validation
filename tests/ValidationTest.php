@@ -664,7 +664,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
           0,
           1,
           $attributes,
-        )))); //$attributes
+        ))));
 
         $mw = new Validation($expectedValidators);
 
