@@ -17,6 +17,15 @@ class Validation
     protected $validators = [];
 
     /**
+     * Options.
+     *
+     * @var array
+     */
+    protected $options = [
+      'useTemplate' => false,
+    ];
+
+    /**
      * The translator to use fro the exception message.
      *
      * @var callable
@@ -63,8 +72,9 @@ class Validation
      *
      * @param null|array|ArrayAccess $validators
      * @param null|callable          $translator
+     * @param []|array               $options
      */
-    public function __construct($validators = null, $translator = null)
+    public function __construct($validators = null, $translator = null, $options = [])
     {
         // Set the validators
         if (is_array($validators) || $validators instanceof \ArrayAccess) {
@@ -73,6 +83,7 @@ class Validation
             $this->validators = [];
         }
         $this->translator = $translator;
+        $this->options = array_merge($this->options, $options);
     }
 
     /**
@@ -122,7 +133,11 @@ class Validation
                   if ($this->translator) {
                       $exception->setParam('translator', $this->translator);
                   }
-                  $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
+                  if ($this->options['useTemplate']) {
+                      $this->errors[implode('.', $actualKeys)] = [$exception->getMainMessage()];
+                  } else {
+                      $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
+                  }
               }
           }
 

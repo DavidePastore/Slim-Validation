@@ -321,6 +321,29 @@ $middleware = new \DavidePastore\Slim\Validation\Validation($validators, $transl
 $app->run();
 ```
 
+### Use templates
+
+With the third parameter you can specify to use [templates][custom-messages].
+
+```php
+use Respect\Validation\Validator as v;
+
+$app = new \Slim\App();
+
+//Create the validators
+$usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
+$ageValidator = v::numeric()->positive()->between(1, 20);
+$validators = array(
+  'hostname' => v::regex('/^[a-zA-Z]([-.a-zA-Z0-9]{0,61}[a-zA-Z0-9]){0,1}$/')->setTemplate('Hostname {{name}} is not valid')
+);
+
+$middleware = new \DavidePastore\Slim\Validation\Validation($validators, null, array('useTemplate' => true));
+
+// Register middleware for all routes or only for one...
+
+$app->run();
+```
+
 
 ## Testing
 
@@ -340,6 +363,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 
 [respect-validation]: https://github.com/Respect/Validation
+[custom-messages]: https://github.com/Respect/Validation/blob/master/docs/README.md#custom-messages
 [ico-version]: https://img.shields.io/packagist/v/DavidePastore/Slim-Validation.svg?style=flat-square
 [ico-travis]: https://travis-ci.org/DavidePastore/Slim-Validation.svg?branch=master
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/DavidePastore/Slim-Validation.svg?style=flat-square
