@@ -21,6 +21,7 @@ A validation library for the Slim Framework. It internally uses [Respect/Validat
   - [JSON requests](#json-requests)
   - [XML requests](#xml-requests)
   - [Translate errors](#translate-errors)
+  - [Use templates](#use-templates)
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [Credits](#credits)
