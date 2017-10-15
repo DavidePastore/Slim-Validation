@@ -9,8 +9,8 @@ php:
 before_script: composer install
 
 script:
-  - phpunit --testsuite travis-ci
-  - phpunit --coverage-text --coverage-clover=coverage.clover
+  - vendor/bin/phpunit --testsuite travis-ci
+  - vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
 
 after_script:
   - php vendor/bin/ocular code-coverage:upload --format=php-clover coverage.clover

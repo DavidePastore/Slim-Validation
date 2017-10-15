@@ -121,29 +121,29 @@ class Validation
     private function validate($params = [], $validators = [], $actualKeys = [])
     {
         //Validate every parameters in the validators array
-      foreach ($validators as $key => $validator) {
-          $actualKeys[] = $key;
-          $param = $this->getNestedParam($params, $actualKeys);
-          if (is_array($validator)) {
-              $this->validate($params, $validator, $actualKeys);
-          } else {
-              try {
-                  $validator->assert($param);
-              } catch (NestedValidationException $exception) {
-                  if ($this->translator) {
-                      $exception->setParam('translator', $this->translator);
-                  }
-                  if ($this->options['useTemplate']) {
-                      $this->errors[implode('.', $actualKeys)] = [$exception->getMainMessage()];
-                  } else {
-                      $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
-                  }
-              }
-          }
+        foreach ($validators as $key => $validator) {
+            $actualKeys[] = $key;
+            $param = $this->getNestedParam($params, $actualKeys);
+            if (is_array($validator)) {
+                $this->validate($params, $validator, $actualKeys);
+            } else {
+                try {
+                    $validator->assert($param);
+                } catch (NestedValidationException $exception) {
+                    if ($this->translator) {
+                        $exception->setParam('translator', $this->translator);
+                    }
+                    if ($this->options['useTemplate']) {
+                        $this->errors[implode('.', $actualKeys)] = [$exception->getMainMessage()];
+                    } else {
+                        $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
+                    }
+                }
+            }
 
-          //Remove the key added in this foreach
-          array_pop($actualKeys);
-      }
+            //Remove the key added in this foreach
+            array_pop($actualKeys);
+        }
     }
 
     /**
