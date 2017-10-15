@@ -178,8 +178,9 @@ class Validation
      *
      * @return array An array with the array info.
      */
-    private function retrieveRouteInfo($request){
-        if(isset($request->getAttribute('routeInfo')[2])){
+    private function retrieveRouteInfo($request)
+    {
+        if (isset($request->getAttribute('routeInfo')[2])) {
             return (array) $request->getAttribute('routeInfo')[2];
         } else {
             return [];
