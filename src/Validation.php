@@ -99,7 +99,7 @@ class Validation
     {
         $this->errors = [];
         $params = $request->getParams();
-        $params = array_merge((array) $request->getAttribute('routeInfo')[2], $params);
+        $params = array_merge((array) $this->retrieveRouteInfo($request), $params);
         $this->validate($params, $this->validators);
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
@@ -168,6 +168,22 @@ class Validation
             } else {
                 return;
             }
+        }
+    }
+
+    /**
+     * Retrieve the route info as an array if any.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
+     *
+     * @return array An array with the array info.
+     */
+    private function retrieveRouteInfo($request)
+    {
+        if (isset($request->getAttribute('routeInfo')[2])) {
+            return (array) $request->getAttribute('routeInfo')[2];
+        } else {
+            return [];
         }
     }
 
