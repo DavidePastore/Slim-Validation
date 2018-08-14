@@ -160,7 +160,7 @@ class Validation
             return $params;
         } else {
             $firstKey = array_shift($keys);
-            if (array_key_exists($firstKey, $params)) {
+            if ($this->isArrayLike($params) && array_key_exists($firstKey, $params)) {
                 $params = (array) $params;
                 $paramValue = $params[$firstKey];
 
@@ -169,6 +169,17 @@ class Validation
                 return;
             }
         }
+    }
+
+    /**
+     * Check if the given $params is an array like variable.
+     * @param array $params The variable to check.
+     * 
+     * @return boolean Returns true if the given $params parameter is array like.
+     */
+    private function isArrayLike($params)
+    {
+        return is_array($params) || $params instanceof \SimpleXMLElement;
     }
 
     /**

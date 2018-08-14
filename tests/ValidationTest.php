@@ -387,6 +387,37 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               ),
             ),
           ),
+          //Nested complex JSON validation with errors
+          array(
+            array(
+              'message' => array(
+                'notification' => array(
+                  'title' => v::stringType()->length(1, null)->setName("notificationTitle"),
+                  'body' => v::stringType()->length(1, null)->setName("notificationBody"),
+                  'actionName' => v::optional(v::stringType()->length(1, null))->setName("notificationAction")
+                )
+              ),
+            ),
+            null,
+            true,
+            array(
+              'message.notification.title' => array(
+                'notificationTitle must be a string',
+                'notificationTitle must have a length greater than 1',
+              ),
+              'message.notification.body' => array(
+                'notificationBody must be a string',
+                'notificationBody must have a length greater than 1',
+              ),
+            ),
+            'JSON',
+            array(
+              'message' => array(
+                'notification' => 1,
+              ),
+            ),
+          ),
+
           //XML validation without errors
           array(
             array(
@@ -741,5 +772,10 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ['routeParam' => 'davidepastore'],
           ),
         );
+    }
+
+    public function testNestedObject()
+    {
+      
     }
 }
