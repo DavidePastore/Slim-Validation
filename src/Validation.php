@@ -173,6 +173,7 @@ class Validation
 
     /**
      * Check if the given $params is an array like variable.
+     * 
      * @param array $params The variable to check.
      * 
      * @return boolean Returns true if the given $params parameter is array like.
