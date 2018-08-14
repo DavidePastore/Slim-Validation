@@ -387,6 +387,37 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               ),
             ),
           ),
+          //Nested complex JSON validation with errors
+          array(
+            array(
+              'message' => array(
+                'notification' => array(
+                  'title' => v::stringType()->length(1, null)->setName("notificationTitle"),
+                  'body' => v::stringType()->length(1, null)->setName("notificationBody"),
+                  'actionName' => v::optional(v::stringType()->length(1, null))->setName("notificationAction")
+                )
+              ),
+            ),
+            null,
+            true,
+            array(
+              'message.notification.title' => array(
+                'notificationTitle must be a string',
+                'notificationTitle must have a length greater than 1',
+              ),
+              'message.notification.body' => array(
+                'notificationBody must be a string',
+                'notificationBody must have a length greater than 1',
+              ),
+            ),
+            'JSON',
+            array(
+              'message' => array(
+                'notification' => 1,
+              ),
+            ),
+          ),
+
           //XML validation without errors
           array(
             array(
@@ -742,44 +773,4 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
           ),
         );
     }
-
-    /*
-    public function testUseTemplate()
-    {
-        $this->setupGet();
-        $hostnameValidator = v::regex('/^[a-zA-Z]([-.a-zA-Z0-9]{0,61}[a-zA-Z0-9]){0,1}$/')->setTemplate('Hostname {{name}} is not valid');
-        $entryValidator = v::regex('/^[a-zA-Z]$/')->setTemplate('Entry {{name}} should contain only letters');
-        $expectedValidators = array(
-          'username' => $hostnameValidator,
-          'age' => $entryValidator,
-        );
-        $mw = new Validation($expectedValidators, null, ['useTemplate' => true]);
-
-        $errors = null;
-        $hasErrors = null;
-        $validators = [];
-        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
-            $errors = $req->getAttribute('errors');
-            $hasErrors = $req->getAttribute('has_errors');
-            $validators = $req->getAttribute('validators');
-
-            return $res;
-        };
-
-        $response = $mw($this->request, $this->response, $next);
-
-        $expectedErrors = array(
-          'username' => array(
-            'Hostname "davidepastore" is not valid',
-          ),
-          'age' => array(
-            'Entry "89" should contain only letters',
-          ),
-        );
-
-        $this->assertTrue($hasErrors);
-        $this->assertEquals($expectedErrors, $errors);
-        $this->assertEquals($newValidators, $validators);
-    }
-    */
 }
