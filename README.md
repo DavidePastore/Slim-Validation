@@ -63,7 +63,7 @@ $app->get('/api/myEndPoint',function ($req, $res, $args) {
       //There are errors, read them
       $errors = $req->getAttribute('errors');
 
-      /* $errors contain:
+      /* $errors contains:
       array(
         'username' => array(
           '"davidepastore" must have a length between 1 and 10',
@@ -108,7 +108,7 @@ $app->get('/foo', function ($req, $res, $args) {
     //There are errors, read them
     $errors = $req->getAttribute('errors');
 
-    /* $errors contain:
+    /* $errors contains:
     array(
       'username' => array(
         '"davidepastore" must have a length between 1 and 10',
@@ -156,7 +156,7 @@ $app->get('/foo/{param}', function ($req, $res, $args) {
     //There are errors, read them
     $errors = $req->getAttribute('errors');
 
-    /* $errors contain:
+    /* $errors contains:
     array(
         'param' => array(
           '"wrong" must be numeric',
