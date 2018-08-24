@@ -21,7 +21,6 @@ A validation library for the Slim Framework. It internally uses [Respect/Validat
   - [JSON requests](#json-requests)
   - [XML requests](#xml-requests)
   - [Translate errors](#translate-errors)
-  - [Use templates](#use-templates)
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [Credits](#credits)
@@ -316,29 +315,6 @@ $translator = function($message){
 };
 
 $middleware = new \DavidePastore\Slim\Validation\Validation($validators, $translator);
-
-// Register middleware for all routes or only for one...
-
-$app->run();
-```
-
-### Use templates
-
-With the third parameter you can specify to use [templates][custom-messages].
-
-```php
-use Respect\Validation\Validator as v;
-
-$app = new \Slim\App();
-
-//Create the validators
-$usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
-$ageValidator = v::numeric()->positive()->between(1, 20);
-$validators = array(
-  'hostname' => v::regex('/^[a-zA-Z]([-.a-zA-Z0-9]{0,61}[a-zA-Z0-9]){0,1}$/')->setTemplate('Hostname {{name}} is not valid')
-);
-
-$middleware = new \DavidePastore\Slim\Validation\Validation($validators, null, array('useTemplate' => true));
 
 // Register middleware for all routes or only for one...
 
