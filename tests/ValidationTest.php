@@ -216,7 +216,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
                 '"davidepastore" must have a length between 1 and 5',
               ),
               'age' => array(
-                '"89" must be lower than or equals 60',
+                '"89" must be less than or equal to 60',
               ),
             ),
           ),
@@ -370,7 +370,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             true,
             array(
               'email.sub.sub-sub.finally' => array(
-                '321 must be lower than or equals 200',
+                '321 must be less than or equal to 200',
               ),
             ),
             'JSON',
@@ -543,7 +543,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             true,
             array(
               'email.sub.sub-sub.finally' => array(
-                '"321" must be lower than or equals 200',
+                '"321" must be less than or equal to 200',
               ),
             ),
             'XML',
@@ -627,7 +627,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             '"davidepastore" must have a length between 1 and 10',
           ),
           'age' => array(
-            '"89" must be lower than or equals 20',
+            '"89" must be less than or equal to 20',
           ),
         );
 
