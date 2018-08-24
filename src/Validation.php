@@ -22,7 +22,6 @@ class Validation
      * @var array
      */
     protected $options = [
-      'useTemplate' => false,
     ];
 
     /**
@@ -133,11 +132,7 @@ class Validation
                     if ($this->translator) {
                         $exception->setParam('translator', $this->translator);
                     }
-                    if ($this->options['useTemplate']) {
-                        $this->errors[implode('.', $actualKeys)] = [$exception->getMainMessage()];
-                    } else {
-                        $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
-                    }
+                    $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
                 }
             }
 
