@@ -29,5 +29,10 @@
         "psr-4": {
             "DavidePastore\\Slim\\Validation\\Tests\\": "tests"
         }
+    },
+    "config": {
+        "platform": {
+            "php": "5.5"
+        }
     }
 }
