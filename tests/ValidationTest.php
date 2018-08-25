@@ -216,7 +216,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
                 '"davidepastore" must have a length between 1 and 5',
               ),
               'age' => array(
-                '"89" must be lower than or equals 60',
+                '"89" must be less than or equal to 60',
               ),
             ),
           ),
@@ -370,7 +370,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             true,
             array(
               'email.sub.sub-sub.finally' => array(
-                '321 must be lower than or equals 200',
+                '321 must be less than or equal to 200',
               ),
             ),
             'JSON',
@@ -543,7 +543,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             true,
             array(
               'email.sub.sub-sub.finally' => array(
-                '"321" must be lower than or equals 200',
+                '"321" must be less than or equal to 200',
               ),
             ),
             'XML',
@@ -559,32 +559,6 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
                 </sub>
               </email>
             </person>',
-          ),
-
-          //With useTemplate options on
-          array(
-            array(
-              'hostname' => v::regex('/^[a-zA-Z]([-.a-zA-Z0-9]{0,61}[a-zA-Z0-9]){0,1}$/')->setTemplate('Hostname {{name}} is not valid'),
-              'entry' => v::regex('/^[a-zA-Z]$/')->setTemplate('Entry {{name}} should contain only letters'),
-            ),
-            null,
-            true,
-            array(
-              'hostname' => array(
-                'Hostname ".justAnInvalidHostname.lol" is not valid',
-              ),
-              'entry' => array(
-                'Entry "123" should contain only letters',
-              ),
-            ),
-            'JSON',
-            array(
-              'hostname' => '.justAnInvalidHostname.lol',
-              'entry' => '123',
-            ),
-            array(
-              'useTemplate' => true,
-            ),
           ),
       );
     }
@@ -627,7 +601,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             '"davidepastore" must have a length between 1 and 10',
           ),
           'age' => array(
-            '"89" must be lower than or equals 20',
+            '"89" must be less than or equal to 20',
           ),
         );
 
