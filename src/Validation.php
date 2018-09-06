@@ -3,6 +3,7 @@
 namespace DavidePastore\Slim\Validation;
 
 use Respect\Validation\Exceptions\NestedValidationException;
+use Respect\Validation\Validator;
 
 /**
  * Validation for Slim.
@@ -67,6 +68,13 @@ class Validation
     protected $translator_name = 'translator';
 
     /**
+     * Is the validators an instance of Validator?
+     *
+     * @var boolean
+     */
+    protected $isValidator = false;
+
+    /**
      * Create new Validator service provider.
      *
      * @param null|array|ArrayAccess $validators
@@ -78,6 +86,9 @@ class Validation
         // Set the validators
         if (is_array($validators) || $validators instanceof \ArrayAccess) {
             $this->validators = $validators;
+        } elseif ($validators instanceof Validator) {
+            $this->validators = $validators;
+            $this->isValidator = true;
         } elseif (is_null($validators)) {
             $this->validators = [];
         }
@@ -99,7 +110,11 @@ class Validation
         $this->errors = [];
         $params = $request->getParams();
         $params = array_merge((array) $request->getAttribute('routeInfo')[2], $params);
-        $this->validate($params, $this->validators);
+        if ($this->isValidator) {
+            $this->validateParam($params, $this->validators);
+        } else {
+            $this->validate($params, $this->validators);
+        }
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
         $request = $request->withAttribute($this->has_errors_name, $this->hasErrors());
@@ -126,18 +141,34 @@ class Validation
             if (is_array($validator)) {
                 $this->validate($params, $validator, $actualKeys);
             } else {
-                try {
-                    $validator->assert($param);
-                } catch (NestedValidationException $exception) {
-                    if ($this->translator) {
-                        $exception->setParam('translator', $this->translator);
-                    }
-                    $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
-                }
+                $this->validateParam($param, $validator, $actualKeys);
             }
 
             //Remove the key added in this foreach
             array_pop($actualKeys);
+        }
+    }
+
+    /**
+     * Validate a param.
+     * @param any $param The parameter to validate.
+     * @param any $validator The validator to use to validate the given parameter.
+     * @param array $actualKeys An array with the position of the parameter. 
+     */
+    private function validateParam($param, $validator, $actualKeys = []) {
+        try {
+            $validator->assert($param);
+        } catch (NestedValidationException $exception) {
+            if ($this->translator) {
+                $exception->setParam('translator', $this->translator);
+            }
+
+            $messages = $exception->getMessages();
+            if (empty($actualKeys)) {
+                $this->errors = $messages;
+            } else {
+                $this->errors[implode('.', $actualKeys)] = $messages;
+            }
         }
     }
 

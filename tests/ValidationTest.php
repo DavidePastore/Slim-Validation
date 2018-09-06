@@ -271,6 +271,50 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               'username' => 'jsonusername',
             ),
           ),
+
+          //JSON validation with array without errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("id", v::intVal()),
+                 v::key("key", v::stringType())
+              )
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              array(
+                'id' => 1234,
+                'key' => 'value'
+              ),
+            ),
+          ),
+
+          //JSON validation with array with errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("id", v::intVal()),
+                 v::key("key", v::stringType())
+              )
+            ),
+            null,
+            true,
+            array(
+              'Must have keys { "id", "key" }'
+            ),
+            'JSON',
+            array(
+              array(
+                'id' => 1234,
+                'key' => 'value',
+                'unwanted' => 'value'
+              ),
+            ),
+          ),
+
           //Complex JSON validation without errors
           array(
             array(
