@@ -153,9 +153,10 @@ class Validation
      * Validate a param.
      * @param any $param The parameter to validate.
      * @param any $validator The validator to use to validate the given parameter.
-     * @param array $actualKeys An array with the position of the parameter. 
+     * @param array $actualKeys An array with the position of the parameter.
      */
-    private function validateParam($param, $validator, $actualKeys = []) {
+    private function validateParam($param, $validator, $actualKeys = [])
+    {
         try {
             $validator->assert($param);
         } catch (NestedValidationException $exception) {
