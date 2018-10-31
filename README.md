@@ -227,7 +227,44 @@ Array
 )
 */
 ```
+And you can also validate multiple identical objects into array using asterisk sign in this way:
 
+```php
+use Respect\Validation\Validator as v;
+
+$app = new \Slim\App();
+
+//Create the validators
+$nameValidator = v::alnum()->length(1, 100);
+$ageValidator = v::numeric()->between(0, 120);
+$validators = array(
+  'people' => array(
+    '*' => array(
+      'name' => $nameValidator,
+      'age' => $ageValidator,
+    )
+  ),
+);
+```
+
+If you'll have an error in some of objects, the result would be like this where **2** is the index of the object into *people* array:
+
+```php
+//In your route
+$errors = $req->getAttribute('errors');
+
+print_r($errors);
+/*
+Array
+(
+    [people.2.age] => Array
+        (
+            [0] => "180 must be less than or equal to 120"
+        )
+
+)
+*/
+```
 
 ### XML requests
 
