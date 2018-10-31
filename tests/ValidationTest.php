@@ -417,6 +417,34 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               ),
             ),
           ),
+          //Multiple nested JSON validation with errors
+          array(
+            array(
+              'messages' => array(
+                '*' => array(
+                  'title' => v::stringType()->length(6, null)->setName("messageTitle")
+                )
+              ),
+            ),
+            null,
+            true,
+            array(
+              'messages.0.title' => array(
+                'messageTitle must have a length greater than 6',
+              ),
+            ),
+            'JSON',
+            array(
+              'messages' => array(
+                array(
+                  'title' => 'Title'
+                ),
+                array(
+                  'title' => 'Long title'
+                ),
+              ),
+            ),
+          ),
 
           //XML validation without errors
           array(
