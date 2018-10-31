@@ -124,7 +124,17 @@ class Validation
             $actualKeys[] = $key;
             $param = $this->getNestedParam($params, $actualKeys);
             if (is_array($validator)) {
-                $this->validate($params, $validator, $actualKeys);
+                if ($key === "*") {
+                    $arrayKeys = array_keys($params[$actualKeys[0]]);
+                    $innerActualKeys = array_splice($actualKeys, 0, -1);
+                    foreach ($arrayKeys as $arrayKey) {
+                        $innerActualKeys[] = $arrayKey;
+                        $this->validate($params, $validator, $innerActualKeys);
+                        array_pop($innerActualKeys);
+                    }
+                } else {
+                    $this->validate($params, $validator, $actualKeys);
+                }
             } else {
                 try {
                     $validator->assert($param);
