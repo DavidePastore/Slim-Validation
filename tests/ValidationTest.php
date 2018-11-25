@@ -31,7 +31,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
     protected $response;
 
     /**
-     * Run before each test.
+     * Setup for the GET JSON requests.
      */
     public function setupGet()
     {
