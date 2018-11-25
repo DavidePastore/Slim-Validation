@@ -20,6 +20,7 @@ A validation library for the Slim Framework. It internally uses [Respect/Validat
   - [Route parameters](#route-parameters)
   - [JSON requests](#json-requests)
   - [XML requests](#xml-requests)
+  - [Array](#array)
   - [Translate errors](#translate-errors)
 - [Testing](#testing)
 - [Contributing](#contributing)
@@ -282,6 +283,42 @@ Array
         (
             [0] => "rq3r" must have a length between 1 and 2
         )
+
+)
+*/
+```
+
+
+### Array
+
+If you want to validate a request that contains an array as the root level, you can directly use [Respect/Validation][respect-validation] as the first parameter of the Validation middleware. For example:
+
+```php
+use Respect\Validation\Validator as v;
+
+$app = new \Slim\App();
+
+//Create the validators
+$validators = v::each(
+  v::keySet(
+      v::key("id", v::intVal()),
+      v::key("key", v::stringType())
+  )
+);
+```
+
+
+If you'll have an error, the result would be:
+
+```php
+//In your route
+$errors = $req->getAttribute('errors');
+
+print_r($errors);
+/*
+Array
+(
+    [0] => Must have keys { "id", "key" }
 
 )
 */
