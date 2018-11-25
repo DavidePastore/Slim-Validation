@@ -315,6 +315,22 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ),
           ),
 
+          //JSON validation with an empty array without errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("nested", v::keySet(
+                    v::key("id", v::intVal())
+                 ))
+              )
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(),
+          ),
+
           //Complex JSON validation with array without errors
           array(
             v::each(
