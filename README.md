@@ -325,7 +325,7 @@ $app->run();
 ## Testing
 
 ``` bash
-$ phpunit
+$ vendor\bin\phpunit
 ```
 
 
