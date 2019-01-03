@@ -853,4 +853,58 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
           ),
         );
     }
+
+    public function testArrayParametersWithGet() {
+      $uri = Uri::createFromString('https://example.com:443/foo/bar?test=1');
+      $headers = new Headers();
+      $headers->set('Content-Type', 'application/json;charset=utf8');
+      $cookies = [];
+      $env = Environment::mock([
+        'SCRIPT_NAME' => '/index.php',
+        'REQUEST_URI' => '/foo',
+        'REQUEST_METHOD' => 'POST',
+      ]);
+      $serverParams = $env->all();
+      $body = new RequestBody();
+      $json = array(
+        array(
+          'id' => 1234
+        ),
+      );
+      $body->write(json_encode($json));
+      $this->request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
+      $this->response = new Response();
+      $expectedValidators = v::allOf(
+        v::each(
+          v::keySet(
+            v::key("id", v::intVal())
+          )
+        ),
+        v::key('test', v::stringType())
+      );
+      $expectedTranslator = null;
+      $expectedErrors = array();
+      $mw = new Validation($expectedValidators, $expectedTranslator);
+
+      $errors = null;
+      $hasErrors = null;
+      $validators = null;
+      $translator = null;
+      $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators, &$translator) {
+          $errors = $req->getAttribute('errors');
+          $hasErrors = $req->getAttribute('has_errors');
+          $validators = $req->getAttribute('validators');
+          $translator = $req->getAttribute('translator');
+
+          return $res;
+      };
+
+      $response = $mw($this->request, $this->response, $next);
+
+      $this->assertEquals($expectedErrors, $errors);
+      $this->assertEquals(false, $hasErrors);
+      
+      $this->assertEquals($expectedValidators, $validators);
+      $this->assertEquals($expectedTranslator, $translator);
+    }
 }
