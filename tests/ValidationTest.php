@@ -377,6 +377,102 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ),
           ),
 
+          //Complex JSON validation with key with dependencies without errors (part 1)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              'state' => 'CA'
+            ),
+          ),
+
+          //Complex JSON validation with key with dependencies without errors (part 2)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              'state' => 'NY',
+              'email' => 'test@testfoo.com',
+              'license' => 'GNU'
+            ),
+          ),
+
+          //Complex JSON validation with key with dependencies with errors (part 1)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            true,
+            array(
+              'state must be a subdivision code of United States'
+            ),
+            'JSON',
+            array(
+              'state' => 'SP'
+            ),
+          ),
+
+          //Complex JSON validation with key with dependencies with errors (part 2)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            true,
+            array(
+              'email must be valid email',
+              'Key license must be present'
+            ),
+            'JSON',
+            array(
+              'state' => 'NY',
+              'email' => '!not a valid email!'
+            ),
+          ),
+
           //Complex JSON validation without errors
           array(
             array(
