@@ -142,7 +142,38 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
     public function validationProvider()
     {
         return array(
-          //Validation without errors
+          /*
+          //New style validation without errors
+          array(
+            array(
+              Validation::QUERY_PARAMS => array(
+                'username' => v::alnum()->noWhitespace()->length(1, 15),
+              )
+            ),
+            null,
+            false,
+            array(),
+          ),
+          //New style validation with errors
+          array(
+            array(
+              Validation::QUERY_PARAMS => array(
+                'username' => v::alnum()->noWhitespace()->length(1, 5),
+              ),
+            ),
+            null,
+            true,
+            array(
+              Validation::QUERY_PARAMS => array(
+                'username' => array(
+                  '"davidepastore" must have a length between 1 and 5',
+                ),
+              )
+            ),
+          ),
+          */
+          /*
+          // Old style validation without errors
           array(
             array(
               'username' => v::alnum()->noWhitespace()->length(1, 15),
@@ -151,7 +182,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             false,
             array(),
           ),
-          //Validation with errors
+          //Old style validation with errors
           array(
             array(
               'username' => v::alnum()->noWhitespace()->length(1, 5),
@@ -193,6 +224,10 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             false,
             array(),
           ),
+          //TODO Add the validation with multiple parameters
+
+
+
           //Multiple validation without errors
           array(
             array(
@@ -220,6 +255,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               ),
             ),
           ),
+          */
           //Validation with callable translator
           array(
             array(
@@ -241,6 +277,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               ),
             ),
           ),
+          /*
           //JSON validation without errors
           array(
             array(
@@ -762,6 +799,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               </email>
             </person>',
           ),
+          */
       );
     }
 

@@ -10,6 +10,12 @@ use Respect\Validation\Validator;
  */
 class Validation
 {
+
+    const QUERY_PARAMS = "queryParams";
+    const PARSED_BODY = "parsedBody";
+    const ROUTE_PARAMS = "routeParams";
+    const EVERYTHING = "params";
+
     /**
      * Validators.
      *
@@ -84,13 +90,10 @@ class Validation
     public function __construct($validators = null, $translator = null, $options = [])
     {
         // Set the validators
-        if (is_array($validators) || $validators instanceof \ArrayAccess) {
-            $this->validators = $validators;
-        } elseif ($validators instanceof Validator) {
-            $this->validators = $validators;
-            $this->isValidator = true;
-        } elseif (is_null($validators)) {
+        if (is_null($validators)) {
             $this->validators = [];
+        } else {
+            $this->validators = $validators;
         }
         $this->translator = $translator;
         $this->options = array_merge($this->options, $options);
@@ -108,12 +111,24 @@ class Validation
     public function __invoke($request, $response, $next)
     {
         $this->errors = [];
-        $params = $request->getParams();
-        $params = array_merge((array) $request->getAttribute('routeInfo')[2], $params);
-        if ($this->isValidator) {
-            $this->validateParam($params, $this->validators);
-        } else {
-            $this->validate($params, $this->validators);
+
+        foreach ($this->validators as $key => $validator) {
+            if (is_array($validator) || $validator instanceof \ArrayAccess) {
+                $validator = $validator;
+                $isValidator = false;
+            } elseif ($validator instanceof Validator) {
+                $validator = $validator;
+                $isValidator = true;
+            } elseif (is_null($validators)) {
+                $validator = [];
+            }
+
+            $params = $this->getParamsByKey($key, $request);
+            if ($isValidator) {
+                $this->validateParam($params, $validator, $key);
+            } else {
+                $this->validate($params, $validator, $key);
+            }
         }
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
@@ -130,18 +145,21 @@ class Validation
      *
      * @param array $params     The array of parameters.
      * @param array $validators The array of validators.
+     * @param string $key       The key of the parameters.
      * @param array $actualKeys An array that will save all the keys of the tree to retrieve the correct value.
      */
-    private function validate($params = [], $validators = [], $actualKeys = [])
+    private function validate($params = [], $validators = [], $key, $actualKeys = [])
     {
         //Validate every parameters in the validators array
         foreach ($validators as $key => $validator) {
             $actualKeys[] = $key;
+            print_r($params);
             $param = $this->getNestedParam($params, $actualKeys);
+            print_r($param);
             if (is_array($validator)) {
-                $this->validate($params, $validator, $actualKeys);
+                $this->validate($params, $validator, $key, $actualKeys);
             } else {
-                $this->validateParam($param, $validator, $actualKeys);
+                $this->validateParam($param, $validator, $key, $actualKeys);
             }
 
             //Remove the key added in this foreach
@@ -153,11 +171,14 @@ class Validation
      * Validate a param.
      * @param any $param The parameter to validate.
      * @param any $validator The validator to use to validate the given parameter.
+     * @param string $key The key of the parameters.
      * @param array $actualKeys An array with the position of the parameter.
      */
-    private function validateParam($param, $validator, $actualKeys = [])
+    private function validateParam($param, $validator, $key, $actualKeys = [])
     {
         try {
+            //echo "Trying to validate ";
+            //print_r($param);
             $validator->assert($param);
         } catch (NestedValidationException $exception) {
             if ($this->translator) {
@@ -166,9 +187,19 @@ class Validation
 
             $messages = $exception->getMessages();
             if (empty($actualKeys)) {
-                $this->errors = $messages;
+                $this->errors[$key] = $messages;
             } else {
-                $this->errors[implode('.', $actualKeys)] = $messages;
+                //$this->errors[$key]
+                $localErrors = [];
+                if (array_key_exists($key, $this->errors)) {
+                    $localErrors = $this->errors[$key];
+                }
+                $this->errors[$key] = array_merge($localErrors, array(
+                    $key => array(
+                        implode('.', $actualKeys) => $messages
+                    )
+                ));
+                //$this->errors[$key][implode('.', $actualKeys)] = $messages;
             }
         }
     }
@@ -208,6 +239,31 @@ class Validation
     private function isArrayLike($params)
     {
         return is_array($params) || $params instanceof \SimpleXMLElement;
+    }
+
+    /**
+     * Get the parameters by the given key.
+     * 
+     * @param string $key                                       The key of the parameter.
+     * @param \Psr\Http\Message\ServerRequestInterface $request PSR7 request.
+     * 
+     * @return array Returns the array with the parameters by the given key.
+     */
+    private function getParamsByKey($key, $request) {
+        if (self::QUERY_PARAMS === $key) {
+            return $request->getQueryParams();
+        } elseif (self::PARSED_BODY === $key) {
+            return $request->getParsedBody();
+        } elseif (self::ROUTE_PARAMS === $key){
+            return (array) $request->getAttribute('routeInfo')[2];
+        } elseif (self::EVERYTHING === $key) {
+            $params = $request->getParams();
+            return array_merge((array) $request->getAttribute('routeInfo')[2], $params);
+        } else {
+            // TODO Create an internal flag to handle all the parameters as the root level
+            $params = $request->getParams();
+            return array_merge((array) $request->getAttribute('routeInfo')[2], $params);
+        }
     }
 
     /**
