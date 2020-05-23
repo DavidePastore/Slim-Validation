@@ -14,6 +14,8 @@ matrix:
   allow_failures:
     - php: hhvm
       dist: trusty
+    - php: 7.4
+      dist: trusty
 
 before_script: composer install
 
