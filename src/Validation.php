@@ -25,7 +25,7 @@ class Validation
     ];
 
     /**
-     * The translator to use fro the exception message.
+     * The translator to use for the exception message.
      *
      * @var callable
      */
