@@ -2,8 +2,11 @@
 
 namespace DavidePastore\Slim\Validation;
 
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Respect\Validation\Exceptions\NestedValidationException;
+use Slim\Routing\RouteContext;
 
 /**
  * Validation for Slim.
@@ -23,10 +26,11 @@ class Validation
      * @var array
      */
     protected $options = [
+        'useTemplate' => false,
     ];
 
     /**
-     * The translator to use for the exception message.
+     * The translator to use fro the exception message.
      *
      * @var callable
      */
@@ -95,11 +99,17 @@ class Validation
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function __invoke($request, RequestHandlerInterface $handler)
+    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $this->errors = [];
         $params = $request->getParsedBody();
-        $params = array_merge((array) $request->getAttribute('routeInfo')[2], $params);
+
+        $routeContext = RouteContext::fromRequest($request);
+        $route = $routeContext->getRoute();
+        $arguments = $route->getArguments();
+
+        $params = array_merge((array) $arguments, (array)$params);
+
         $this->validate($params, $this->validators);
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
@@ -133,7 +143,11 @@ class Validation
                     if ($this->translator) {
                         $exception->setParam('translator', $this->translator);
                     }
-                    $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
+                    if ($this->options['useTemplate']) {
+                        $this->errors[implode('.', $actualKeys)] = [$exception->getMainMessage()];
+                    } else {
+                        $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
+                    }
                 }
             }
 
