@@ -9,7 +9,6 @@ use Respect\Validation\Validator as v;
 
 class ValidationTest extends TestCase
 {
-
     public function testSetValidators()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
@@ -41,17 +40,16 @@ class ValidationTest extends TestCase
         $app = $this->getAppInstance();
 
         $app->get('/foo', function (ServerRequestInterface $request, ResponseInterface $response, $args) use ($expectedErrors, $newValidators) {
-
             $errors = $request->getAttribute('errors');
             $hasErrors = $request->getAttribute('has_errors');
             $validators = $request->getAttribute('validators');
-
 
             \PHPUnit\Framework\Assert::assertTrue($hasErrors);
             \PHPUnit\Framework\Assert::assertEquals($expectedErrors, $errors);
             \PHPUnit\Framework\Assert::assertEquals($newValidators, $validators);
 
             $response->getBody()->write('Hello world!');
+
             return $response;
         })->add($mw);
 
@@ -70,8 +68,6 @@ class ValidationTest extends TestCase
 
         $this->assertEquals(200, $response->getStatusCode());
     }
-
-
 
     public function testSetTranslator()
     {
@@ -99,11 +95,10 @@ class ValidationTest extends TestCase
                 'length' => '"davidepastore" deve avere una dimensione di caratteri compresa tra 1 e 5 (nuovo)',
             ],
         ];
-        
+
         $app = $this->getAppInstance();
 
         $app->post('/translator', function (ServerRequestInterface $request, ResponseInterface $response, $args) use ($expectedErrors, $expectedValidators, $newTranslator) {
-
             $errors = $request->getAttribute('errors');
             $hasErrors = $request->getAttribute('has_errors');
             $validators = $request->getAttribute('validators');
@@ -115,6 +110,7 @@ class ValidationTest extends TestCase
             \PHPUnit\Framework\Assert::assertEquals($newTranslator, $translator);
 
             $response->getBody()->write('Hello world!');
+
             return $response;
         })->add($mw);
 

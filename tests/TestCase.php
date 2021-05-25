@@ -16,7 +16,7 @@ class TestCase extends PHPUnit_TestCase
 {
     /**
      * @throws Exception
-     * 
+     *
      * @return App
      */
     protected function getAppInstance(): App
@@ -38,7 +38,6 @@ class TestCase extends PHPUnit_TestCase
 
         return $app;
     }
-
     /**
      * Create a server request.
      *
