@@ -15,8 +15,9 @@ use Slim\Psr7\Factory\ServerRequestFactory;
 class TestCase extends PHPUnit_TestCase
 {
     /**
-     * @return App
      * @throws Exception
+     * 
+     * @return App
      */
     protected function getAppInstance(): App
     {
@@ -41,9 +42,9 @@ class TestCase extends PHPUnit_TestCase
     /**
      * Create a server request.
      *
-     * @param string $method The HTTP method
-     * @param string|UriInterface $uri The URI
-     * @param array $serverParams The server parameters
+     * @param string              $method       The HTTP method
+     * @param string|UriInterface $uri          The URI
+     * @param array               $serverParams The server parameters
      *
      * @return ServerRequestInterface
      */
@@ -59,9 +60,9 @@ class TestCase extends PHPUnit_TestCase
     /**
      * Create a JSON request.
      *
-     * @param string $method The HTTP method
-     * @param string|UriInterface $uri The URI
-     * @param array|null $data The json data
+     * @param string              $method The HTTP method
+     * @param string|UriInterface $uri    The URI
+     * @param array|null          $data   The json data
      *
      * @return ServerRequestInterface
      */

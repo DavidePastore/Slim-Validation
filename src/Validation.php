@@ -75,7 +75,7 @@ class Validation
      * Create new Validator service provider.
      *
      * @param null|array|ArrayAccess $validators
-     * @param null|array          $translator
+     * @param null|array             $translator
      * @param []|array               $options
      */
     public function __construct($validators = null, $translator = null, $options = [])
@@ -94,7 +94,7 @@ class Validation
      * Validation middleware invokable class.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
-     * @param \Psr\Http\Server\RequestHandlerInterface      $response PSR7 response
+     * @param \Psr\Http\Server\RequestHandlerInterface $response PSR7 response
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
@@ -109,7 +109,7 @@ class Validation
 
         $queryParams = $request->getQueryParams();
 
-        $params = array_merge((array) $arguments, (array)$params, (array)$queryParams);
+        $params = array_merge((array) $arguments, (array) $params, (array) $queryParams);
 
         $this->validate($params, $this->validators);
 
@@ -187,7 +187,7 @@ class Validation
      *
      * @param array $params The variable to check.
      *
-     * @return boolean Returns true if the given $params parameter is array like.
+     * @return bool Returns true if the given $params parameter is array like.
      */
     private function isArrayLike($params)
     {

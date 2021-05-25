@@ -2,7 +2,6 @@
 
 namespace DavidePastore\Slim\Validation\Tests;
 
-use DavidePastore\Slim\Validation\Tests\TestCase;
 use DavidePastore\Slim\Validation\Validation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -15,29 +14,29 @@ class ValidationTest extends TestCase
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 20);
         $ageValidator = v::numericVal()->positive()->between(1, 100);
-        $expectedValidators = array(
+        $expectedValidators = [
             'username' => $usernameValidator,
-            'age' => $ageValidator,
-        );
+            'age'      => $ageValidator,
+        ];
         $mw = new Validation($expectedValidators);
 
         $newUsernameValidator = v::alnum()->noWhitespace()->length(1, 10);
         $newAgeValidator = v::numericVal()->positive()->between(1, 20);
-        $newValidators = array(
+        $newValidators = [
             'username' => $newUsernameValidator,
-            'age' => $newAgeValidator,
-        );
+            'age'      => $newAgeValidator,
+        ];
 
         $mw->setValidators($newValidators);
 
-        $expectedErrors = array(
-            'username' => array(
+        $expectedErrors = [
+            'username' => [
                 'length' => '"davidepastore" must have a length between 1 and 10',
-            ),
-            'age' => array(
+            ],
+            'age' => [
                 'between' => '"89" must be between 1 and 20',
-            ),
-        );
+            ],
+        ];
 
         $app = $this->getAppInstance();
 
@@ -58,7 +57,7 @@ class ValidationTest extends TestCase
 
         $params = [
             'username' => 'davidepastore',
-            'age' => 89
+            'age'      => 89,
         ];
 
         $url = sprintf('/foo?%s', http_build_query($params));
@@ -77,30 +76,17 @@ class ValidationTest extends TestCase
     public function testSetTranslator()
     {
         $usernameValidator = v::alnum()->noWhitespace()->length(1, 5);
-        $expectedValidators = array(
+        $expectedValidators = [
             'username' => $usernameValidator,
-        );
+        ];
 
         $translator = [
-            'alnum' => 'Queste regole devono passare per {{name}}', //'These rules must pass for {{name}}'
+            'alnum'        => 'Queste regole devono passare per {{name}}', //'These rules must pass for {{name}}'
             'noWhitespace' => '{{name}} deve essere una stringa', //'{{name}} must be a string'
-            'length' => '{{name}} deve avere una dimensione di caratteri compresa tra {{minValue}} e {{maxValue}}', //'{{name}} must have a length between {{minValue}} and {{maxValue}}'
+            'length'       => '{{name}} deve avere una dimensione di caratteri compresa tra {{minValue}} e {{maxValue}}', //'{{name}} must have a length between {{minValue}} and {{maxValue}}'
         ];
 
         $mw = new Validation($expectedValidators, $translator);
-
-        $errors = null;
-        $hasErrors = null;
-        $translator = null;
-        $validators = [];
-        $next = function ($req, $res) use (&$errors, &$hasErrors, &$translator, &$validators) {
-            $errors = $req->getAttribute('errors');
-            $hasErrors = $req->getAttribute('has_errors');
-            $validators = $req->getAttribute('validators');
-            $translator = $req->getAttribute('translator');
-
-            return $res;
-        };
 
         $newTranslator = [
             'length' => '"davidepastore" deve avere una dimensione di caratteri compresa tra 1 e 5 (nuovo)', //'{{name}} must have a length between {{minValue}} and {{maxValue}}'
@@ -108,11 +94,11 @@ class ValidationTest extends TestCase
 
         $mw->setTranslator($newTranslator);
 
-        $expectedErrors = array(
-            'username' => array(
+        $expectedErrors = [
+            'username' => [
                 'length' => '"davidepastore" deve avere una dimensione di caratteri compresa tra 1 e 5 (nuovo)',
-            ),
-        );
+            ],
+        ];
         
         $app = $this->getAppInstance();
 
@@ -133,7 +119,7 @@ class ValidationTest extends TestCase
         })->add($mw);
 
         $data = [
-            'username' => 'davidepastore'
+            'username' => 'davidepastore',
         ];
 
         $request = $this->createJsonRequest('POST', '/translator', $data);
