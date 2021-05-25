@@ -30,9 +30,9 @@ class Validation
     ];
 
     /**
-     * The translator to use fro the exception message.
+     * The translator to use for the exception message.
      *
-     * @var callable
+     * @var array
      */
     protected $translator = null;
 
@@ -75,7 +75,7 @@ class Validation
      * Create new Validator service provider.
      *
      * @param null|array|ArrayAccess $validators
-     * @param null|callable          $translator
+     * @param null|array          $translator
      * @param []|array               $options
      */
     public function __construct($validators = null, $translator = null, $options = [])
@@ -94,8 +94,7 @@ class Validation
      * Validation middleware invokable class.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
-     * @param \Psr\Http\Message\ResponseInterface      $response PSR7 response
-     * @param callable                                 $next     Next middleware
+     * @param \Psr\Http\Server\RequestHandlerInterface      $response PSR7 response
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
@@ -108,7 +107,9 @@ class Validation
         $route = $routeContext->getRoute();
         $arguments = $route->getArguments();
 
-        $params = array_merge((array) $arguments, (array)$params);
+        $queryParams = $request->getQueryParams();
+
+        $params = array_merge((array) $arguments, (array)$params, (array)$queryParams);
 
         $this->validate($params, $this->validators);
 
@@ -141,10 +142,10 @@ class Validation
                     $validator->assert($param);
                 } catch (NestedValidationException $exception) {
                     if ($this->translator) {
-                        $exception->setParam('translator', $this->translator);
+                        $this->translator = $exception->getMessages($this->translator);
                     }
                     if ($this->options['useTemplate']) {
-                        $this->errors[implode('.', $actualKeys)] = [$exception->getMainMessage()];
+                        $this->errors[implode('.', $actualKeys)] = [$exception->getFullMessage()];
                     } else {
                         $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
                     }
