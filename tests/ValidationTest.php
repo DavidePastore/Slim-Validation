@@ -3,23 +3,10 @@
 namespace DavidePastore\Slim\Validation\Tests;
 
 use DavidePastore\Slim\Validation\Tests\TestCase;
-use ReflectionProperty;
-use Slim\Collection;
-use Slim\Http\Body;
-use Slim\Http\Environment;
-
-use Slim\Http\Request;
-use Slim\Http\RequestBody;
-use Slim\Http\Response;
-use Slim\Http\Uri;
 use DavidePastore\Slim\Validation\Validation;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Respect\Validation\Validator as v;
-use Slim\Psr7\Environment as Psr7Environment;
-
-use function DI\value;
 
 class ValidationTest extends TestCase
 {
