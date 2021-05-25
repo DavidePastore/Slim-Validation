@@ -1,3 +1,13 @@
-preset: psr2
-
 risky: false
+version: 7
+preset: recommended
+finder:
+  exclude:
+    - "modules"
+    - "node_modules"
+    - "storage"
+    - "vendor"
+  name: "*.php"
+  not-name:
+    - "*.blade.php"
+    - "_ide_helper.php"
