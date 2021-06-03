@@ -25,9 +25,7 @@ class Validation
      *
      * @var array
      */
-    protected $options = [
-        'useTemplate' => false,
-    ];
+    protected $options = [];
 
     /**
      * The translator to use for the exception message.
@@ -144,11 +142,7 @@ class Validation
                     if ($this->translator) {
                         $this->translator = $exception->getMessages($this->translator);
                     }
-                    if ($this->options['useTemplate']) {
-                        $this->errors[implode('.', $actualKeys)] = [$exception->getFullMessage()];
-                    } else {
-                        $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
-                    }
+                    $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
                 }
             }
 
