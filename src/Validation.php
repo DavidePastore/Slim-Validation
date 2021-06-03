@@ -2,7 +2,11 @@
 
 namespace DavidePastore\Slim\Validation;
 
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Respect\Validation\Exceptions\NestedValidationException;
+use Slim\Routing\RouteContext;
 
 /**
  * Validation for Slim.
@@ -21,13 +25,12 @@ class Validation
      *
      * @var array
      */
-    protected $options = [
-    ];
+    protected $options = [];
 
     /**
      * The translator to use for the exception message.
      *
-     * @var callable
+     * @var array
      */
     protected $translator = null;
 
@@ -70,7 +73,7 @@ class Validation
      * Create new Validator service provider.
      *
      * @param null|array|ArrayAccess $validators
-     * @param null|callable          $translator
+     * @param null|array             $translator
      * @param []|array               $options
      */
     public function __construct($validators = null, $translator = null, $options = [])
@@ -89,16 +92,23 @@ class Validation
      * Validation middleware invokable class.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
-     * @param \Psr\Http\Message\ResponseInterface      $response PSR7 response
-     * @param callable                                 $next     Next middleware
+     * @param \Psr\Http\Server\RequestHandlerInterface $response PSR7 response
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function __invoke($request, $response, $next)
+    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $this->errors = [];
-        $params = $request->getParams();
-        $params = array_merge((array) $request->getAttribute('routeInfo')[2], $params);
+        $params = $request->getParsedBody();
+
+        $routeContext = RouteContext::fromRequest($request);
+        $route = $routeContext->getRoute();
+        $arguments = $route->getArguments();
+
+        $queryParams = $request->getQueryParams();
+
+        $params = array_merge((array) $arguments, (array) $params, (array) $queryParams);
+
         $this->validate($params, $this->validators);
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
@@ -106,7 +116,7 @@ class Validation
         $request = $request->withAttribute($this->validators_name, $this->getValidators());
         $request = $request->withAttribute($this->translator_name, $this->getTranslator());
 
-        return $next($request, $response);
+        return $handler->handle($request);
     }
 
     /**
@@ -130,7 +140,7 @@ class Validation
                     $validator->assert($param);
                 } catch (NestedValidationException $exception) {
                     if ($this->translator) {
-                        $exception->setParam('translator', $this->translator);
+                        $this->translator = $exception->getMessages($this->translator);
                     }
                     $this->errors[implode('.', $actualKeys)] = $exception->getMessages();
                 }
@@ -171,7 +181,7 @@ class Validation
      *
      * @param array $params The variable to check.
      *
-     * @return boolean Returns true if the given $params parameter is array like.
+     * @return bool Returns true if the given $params parameter is array like.
      */
     private function isArrayLike($params)
     {
