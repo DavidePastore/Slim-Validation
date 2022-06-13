@@ -31,7 +31,7 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
     protected $response;
 
     /**
-     * Run before each test.
+     * Setup for the GET JSON requests.
      */
     public function setupGet()
     {
@@ -271,6 +271,208 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
               'username' => 'jsonusername',
             ),
           ),
+
+          //JSON validation with array without errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("id", v::intVal()),
+                 v::key("key", v::stringType())
+              )
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              array(
+                'id' => 1234,
+                'key' => 'value'
+              ),
+            ),
+          ),
+
+          //JSON validation with array with errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("id", v::intVal()),
+                 v::key("key", v::stringType())
+              )
+            ),
+            null,
+            true,
+            array(
+              'Must have keys { "id", "key" }'
+            ),
+            'JSON',
+            array(
+              array(
+                'id' => 1234,
+                'key' => 'value',
+                'unwanted' => 'value'
+              ),
+            ),
+          ),
+
+          //JSON validation with an empty array without errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("nested", v::keySet(
+                    v::key("id", v::intVal())
+                 ))
+              )
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(),
+          ),
+
+          //Complex JSON validation with array without errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("nested", v::keySet(
+                    v::key("id", v::intVal())
+                 ))
+              )
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              array(
+                'nested' => array(
+                  'id' => 1234
+                ),
+              ),
+            ),
+          ),
+
+          //Complex JSON validation with array with errors
+          array(
+            v::each(
+              v::keySet(
+                 v::key("nested", v::keySet(
+                    v::key("key", v::stringType())
+                 ))
+              )
+            ),
+            null,
+            true,
+            array(
+              'key must be a string'
+            ),
+            'JSON',
+            array(
+              array(
+                'nested' => array(
+                  'key' => 1234
+                ),
+              ),
+            ),
+          ),
+
+          //Complex JSON validation with key with dependencies without errors (part 1)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              'state' => 'CA'
+            ),
+          ),
+
+          //Complex JSON validation with key with dependencies without errors (part 2)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            false,
+            array(),
+            'JSON',
+            array(
+              'state' => 'NY',
+              'email' => 'test@testfoo.com',
+              'license' => 'GNU'
+            ),
+          ),
+
+          //Complex JSON validation with key with dependencies with errors (part 1)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            true,
+            array(
+              'state must be a subdivision code of United States'
+            ),
+            'JSON',
+            array(
+              'state' => 'SP'
+            ),
+          ),
+
+          //Complex JSON validation with key with dependencies with errors (part 2)
+          array(
+            v::key('state', v::subdivisionCode('US')->notOptional())
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('email', v::notOptional()->email()),  // then add validation to email
+                v::alwaysValid()                             // else email is always valid
+            )
+            ->when(
+                v::key('state', v::equals('NY')),            // if state = NY
+                v::key('license',  v::notOptional()),        // then make license required
+                v::alwaysValid()                             // else license is always valid
+            ),
+            null,
+            true,
+            array(
+              'email must be valid email',
+              'Key license must be present'
+            ),
+            'JSON',
+            array(
+              'state' => 'NY',
+              'email' => '!not a valid email!'
+            ),
+          ),
+
           //Complex JSON validation without errors
           array(
             array(
@@ -746,5 +948,60 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ['routeParam' => 'davidepastore'],
           ),
         );
+    }
+
+    public function testArrayParametersWithGet()
+    {
+        $uri = Uri::createFromString('https://example.com:443/foo/bar?test=1');
+        $headers = new Headers();
+        $headers->set('Content-Type', 'application/json;charset=utf8');
+        $cookies = [];
+        $env = Environment::mock([
+          'SCRIPT_NAME' => '/index.php',
+          'REQUEST_URI' => '/foo',
+          'REQUEST_METHOD' => 'POST',
+        ]);
+        $serverParams = $env->all();
+        $body = new RequestBody();
+        $json = array(
+          array(
+            'id' => 1234
+          ),
+        );
+        $body->write(json_encode($json));
+        $this->request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
+        $this->response = new Response();
+        $expectedValidators = v::allOf(
+          v::each(
+            v::keySet(
+              v::key("id", v::intVal())
+            )
+          ),
+          v::key('test', v::stringType())
+        );
+        $expectedTranslator = null;
+        $expectedErrors = array();
+        $mw = new Validation($expectedValidators, $expectedTranslator);
+
+        $errors = null;
+        $hasErrors = null;
+        $validators = null;
+        $translator = null;
+        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators, &$translator) {
+            $errors = $req->getAttribute('errors');
+            $hasErrors = $req->getAttribute('has_errors');
+            $validators = $req->getAttribute('validators');
+            $translator = $req->getAttribute('translator');
+
+            return $res;
+        };
+
+        $response = $mw($this->request, $this->response, $next);
+
+        $this->assertEquals($expectedErrors, $errors);
+        $this->assertEquals(false, $hasErrors);
+        
+        $this->assertEquals($expectedValidators, $validators);
+        $this->assertEquals($expectedTranslator, $translator);
     }
 }
