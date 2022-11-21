@@ -2,6 +2,7 @@
 
 namespace DavidePastore\Slim\Validation;
 
+use Psr\Http\Server\RequestHandlerInterface;
 use Respect\Validation\Exceptions\NestedValidationException;
 
 /**
@@ -89,16 +90,17 @@ class Validation
      * Validation middleware invokable class.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
-     * @param \Psr\Http\Message\ResponseInterface      $response PSR7 response
-     * @param callable                                 $next     Next middleware
+     * @param RequestHandlerInterface                  $handler  RequestHandler
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function __invoke($request, $response, $next)
+    public function __invoke($request, RequestHandlerInterface $handler)
     {
         $this->errors = [];
         $params = $request->getParams();
-        $params = array_merge((array) $request->getAttribute('routeInfo')[2], $params);
+        if (!empty($request->getAttribute('routeInfo'))) {
+            $params = array_merge((array)$request->getAttribute('routeInfo')[2], $params);
+        }
         $this->validate($params, $this->validators);
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
@@ -106,7 +108,7 @@ class Validation
         $request = $request->withAttribute($this->validators_name, $this->getValidators());
         $request = $request->withAttribute($this->translator_name, $this->getTranslator());
 
-        return $next($request, $response);
+        return $handler->handle($request);
     }
 
     /**
@@ -119,7 +121,7 @@ class Validation
      */
     private function validate($params = [], $validators = [], $actualKeys = [])
     {
-        //Validate every parameters in the validators array
+        //Validate every parameter in the validators array
         foreach ($validators as $key => $validator) {
             $actualKeys[] = $key;
             $param = $this->getNestedParam($params, $actualKeys);
