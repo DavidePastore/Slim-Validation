@@ -157,7 +157,7 @@ class Validation
             return $params;
         } else {
             $firstKey = array_shift($keys);
-            if ($this->isArrayLike($params) && array_key_exists($firstKey, $params)) {
+            if ($this->isArrayLike($params) && array_key_exists($firstKey, (array)$params)) {
                 $params = (array) $params;
                 $paramValue = $params[$firstKey];
 
