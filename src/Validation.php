@@ -98,9 +98,7 @@ class Validation
     {
         $this->errors = [];
         $params = $request->getParams();
-        if (!empty($request->getAttribute('routeInfo'))) {
-            $params = array_merge((array)$request->getAttribute('routeInfo')[2], $params);
-        }
+        $params = array_merge((array)$request->getAttribute('routeInfo')[2], $params);
         $this->validate($params, $this->validators);
 
         $request = $request->withAttribute($this->errors_name, $this->getErrors());
