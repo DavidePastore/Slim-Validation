@@ -736,16 +736,20 @@ class ValidationTest extends \PHPUnit\Framework\TestCase
             protected $translator = null;
             protected $validators = [];
 
-            public function getErrors() {
+            public function getErrors()
+            {
                 return $this->errors;
             }
-            public function getHasErrors() {
+            public function getHasErrors()
+            {
                 return $this->hasErrors;
             }
-            public function getTranslator() {
+            public function getTranslator()
+            {
                 return $this->translator;
             }
-            public function getValidators() {
+            public function getValidators()
+            {
                 return $this->validators;
             }
 
