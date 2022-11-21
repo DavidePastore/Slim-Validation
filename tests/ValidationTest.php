@@ -17,7 +17,6 @@ use Slim\Psr7\Factory\ServerRequestFactory;
 use DavidePastore\Slim\Validation\Validation;
 use Respect\Validation\Validator as v;
 
-
 class ValidationTest extends \PHPUnit\Framework\TestCase
 {
     /**
