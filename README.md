@@ -1,7 +1,7 @@
 # Slim Framework Validation
 
 [![Latest version][ico-version]][link-packagist]
-[![Build Status][ico-travis]][link-travis]
+[![Build Status][ico-github-actions]][link-github-actions]
 [![Coverage Status][ico-scrutinizer]][link-scrutinizer]
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
@@ -340,14 +340,14 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 [respect-validation]: https://github.com/Respect/Validation
 [custom-messages]: https://respect-validation.readthedocs.io/en/1.1/feature-guide/#custom-messages
 [ico-version]: https://img.shields.io/packagist/v/DavidePastore/Slim-Validation.svg?style=flat-square
-[ico-travis]: https://travis-ci.org/DavidePastore/Slim-Validation.svg?branch=master
+[ico-github-actions]: https://github.com/DavidePastore/Slim-Validation/workflows/Continuous%20Integration/badge.svg?branch=master
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/DavidePastore/Slim-Validation.svg?style=flat-square
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/davidepastore/Slim-Validation.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/davidepastore/slim-validation.svg?style=flat-square
 [ico-styleci]: https://styleci.io/repos/48914054/shield
 
 [link-packagist]: https://packagist.org/packages/davidepastore/slim-validation
-[link-travis]: https://travis-ci.org/DavidePastore/Slim-Validation
+[link-github-actions]: https://github.com/DavidePastore/Slim-Validation/actions?query=workflow%3A%22Continuous+Integration%22
 [link-scrutinizer]: https://scrutinizer-ci.com/g/DavidePastore/Slim-Validation/code-structure
 [link-code-quality]: https://scrutinizer-ci.com/g/DavidePastore/Slim-Validation
 [link-downloads]: https://packagist.org/packages/davidepastore/slim-validation
