@@ -19,7 +19,7 @@
     "require-dev": {
         "slim/slim": "~4.0",
         "phpunit/phpunit": "^9.0",
-        "scrutinizer/ocular": "~1.1"
+        "scrutinizer/ocular": "1.5.*"
     },
     "autoload": {
         "psr-4": {
@@ -30,11 +30,6 @@
     "autoload-dev": {
         "psr-4": {
             "DavidePastore\\Slim\\Validation\\Tests\\": "tests"
-        }
-    },
-    "config": {
-        "platform": {
-            "php": "7.4"
         }
     }
 }
