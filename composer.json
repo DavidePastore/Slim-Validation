@@ -19,7 +19,8 @@
     "require-dev": {
         "slim/slim": "~4.0",
         "phpunit/phpunit": "^7.0",
-        "scrutinizer/ocular": "1.5.*"
+        "scrutinizer/ocular": "1.5.*",
+        "psr/http-factory": "^1.0"
     },
     "autoload": {
         "psr-4": {
