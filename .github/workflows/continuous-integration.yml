@@ -1,0 +1,35 @@
+name: Continuous Integration
+
+on: [push, pull_request]
+
+jobs:
+  quality:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest]
+        php-versions: ['5.6', '7.0', '7.1', '7.2', '7.3']
+    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+            php-version: ${{ matrix.php-versions }}
+      
+      - name: Check PHP Version
+        run: php -v
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: PHP Unit tests
+        run: |
+         vendor/bin/phpunit --testsuite travis-ci
+         vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
+      
+      - name: Upload code coverage data
+        run: php vendor/bin/ocular code-coverage:upload --format=php-clover coverage.clover
