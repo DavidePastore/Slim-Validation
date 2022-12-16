@@ -31,7 +31,7 @@ Via Composer
 $ composer require davidepastore/slim-validation
 ```
 
-Requires Slim 3.0.0 or newer.
+Requires Slim 4.0.0 or newer.
 
 ## Usage
 
