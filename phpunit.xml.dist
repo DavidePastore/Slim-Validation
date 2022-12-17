@@ -8,6 +8,7 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
+         syntaxCheck="false"
          bootstrap="tests/bootstrap.php"
 >
     <testsuites>
@@ -16,9 +17,9 @@
         </testsuite>
     </testsuites>
 
-    <coverage>
-        <include>
+    <filter>
+        <whitelist>
             <directory>src/</directory>
-        </include>
-    </coverage>
+        </whitelist>
+    </filter>
 </phpunit>
