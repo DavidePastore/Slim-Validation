@@ -358,7 +358,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 [respect-validation]: https://github.com/Respect/Validation
 [custom-messages]: https://respect-validation.readthedocs.io/en/1.1/feature-guide/#custom-messages
 [ico-version]: https://img.shields.io/packagist/v/DavidePastore/Slim-Validation.svg?style=flat-square
-[ico-github-actions]: https://github.com/DavidePastore/Slim-Validation/workflows/Continuous%20Integration/badge.svg?branch=master
+[ico-github-actions]: https://github.com/DavidePastore/Slim-Validation/workflows/Continuous%20Integration/badge.svg?branch=4.0
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/DavidePastore/Slim-Validation.svg?style=flat-square
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/davidepastore/Slim-Validation.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/davidepastore/slim-validation.svg?style=flat-square
