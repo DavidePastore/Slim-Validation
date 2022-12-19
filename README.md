@@ -365,7 +365,7 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 [ico-styleci]: https://styleci.io/repos/48914054/shield
 
 [link-packagist]: https://packagist.org/packages/davidepastore/slim-validation
-[link-github-actions]: https://github.com/DavidePastore/Slim-Validation/actions?query=workflow%3A%22Continuous+Integration%22
+[link-github-actions]: https://github.com/DavidePastore/Slim-Validation/actions?query=workflow%3A%22Continuous+Integration%22+branch%3A4.0
 [link-scrutinizer]: https://scrutinizer-ci.com/g/DavidePastore/Slim-Validation/code-structure
 [link-code-quality]: https://scrutinizer-ci.com/g/DavidePastore/Slim-Validation
 [link-downloads]: https://packagist.org/packages/davidepastore/slim-validation
