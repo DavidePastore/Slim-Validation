@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: ['5.6', '7.0', '7.1', '7.2', '7.3']
+        php-versions: ['7.2', '7.3']
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
       - uses: actions/checkout@v2
@@ -27,9 +27,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: PHP Unit tests
-        run: |
-         vendor/bin/phpunit --testsuite travis-ci
-         vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
+        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
       
       - name: Upload code coverage data
         run: php vendor/bin/ocular code-coverage:upload --format=php-clover coverage.clover

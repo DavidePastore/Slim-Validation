@@ -2,31 +2,34 @@
 
 namespace DavidePastore\Slim\Validation\Tests;
 
-use ReflectionProperty;
-use Slim\Collection;
-use Slim\Http\Body;
-use Slim\Http\Environment;
-use Slim\Http\Headers;
-use Slim\Http\Request;
-use Slim\Http\RequestBody;
-use Slim\Http\Response;
-use Slim\Http\Uri;
+use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Slim\Http\Factory\DecoratedServerRequestFactory;
+use Slim\Http\ServerRequest;
+use Slim\Psr7\Stream;
+use Slim\Psr7\Environment;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
+use Slim\Psr7\Factory\UriFactory;
+use Slim\Psr7\Factory\ServerRequestFactory;
 use DavidePastore\Slim\Validation\Validation;
 use Respect\Validation\Validator as v;
 
-class ValidationTest extends \PHPUnit_Framework_TestCase
+class ValidationTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * PSR7 request object.
      *
-     * @var Psr\Http\Message\RequestInterface
+     * @var ServerRequestInterface
      */
     protected $request;
 
     /**
      * PSR7 response object.
      *
-     * @var Psr\Http\Message\ResponseInterface
+     * @var ResponseInterface
      */
     protected $response;
 
@@ -35,13 +38,13 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
      */
     public function setupGet()
     {
-        $uri = Uri::createFromString('https://example.com:443/foo/bar?username=davidepastore&age=89&optional=value');
-        $headers = new Headers();
-        $cookies = [];
+        $uriFactory = new UriFactory();
+        $uri = $uriFactory->createUri('https://example.com:443/foo/bar?username=davidepastore&age=89&optional=value');
         $env = Environment::mock();
-        $serverParams = $env->all();
-        $body = new Body(fopen('php://temp', 'r+'));
-        $this->request = new Request('GET', $uri, $headers, $cookies, $serverParams, $body);
+        $serverParams = $env;
+        $requestFactory = new ServerRequestFactory();
+        $serverRequestFactory = new DecoratedServerRequestFactory($requestFactory);
+        $this->request = $serverRequestFactory->createServerRequest('GET', $uri, $serverParams);
         $this->response = new Response();
     }
 
@@ -52,19 +55,23 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
      */
     public function setupJson($json)
     {
-        $uri = Uri::createFromString('https://example.com:443/foo');
+        $uriFactory = new UriFactory();
+        $uri = $uriFactory->createUri('https://example.com:443/foo');
         $headers = new Headers();
-        $headers->set('Content-Type', 'application/json;charset=utf8');
+        $headers->setHeader('Content-Type', 'application/json;charset=utf8');
         $cookies = [];
-        $env = Environment::mock([
+        $serverParams = Environment::mock([
           'SCRIPT_NAME' => '/index.php',
           'REQUEST_URI' => '/foo',
           'REQUEST_METHOD' => 'POST',
         ]);
-        $serverParams = $env->all();
-        $body = new RequestBody();
+        $stream = fopen('php://temp', 'w+');
+        stream_copy_to_stream(fopen('php://input', 'r'), $stream);
+        rewind($stream);
+        $body = new Stream($stream);
         $body->write(json_encode($json));
-        $this->request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
+        $request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
+        $this->request = new ServerRequest($request);
         $this->response = new Response();
     }
 
@@ -75,19 +82,23 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
      */
     public function setupXml($xml)
     {
-        $uri = Uri::createFromString('https://example.com:443/foo');
+        $uriFactory = new UriFactory();
+        $uri = $uriFactory->createUri('https://example.com:443/foo');
         $headers = new Headers();
-        $headers->set('Content-Type', 'application/xml;charset=utf8');
+        $headers->setHeader('Content-Type', 'application/xml;charset=utf8');
         $cookies = [];
-        $env = Environment::mock([
+        $serverParams = Environment::mock([
             'SCRIPT_NAME' => '/index.php',
             'REQUEST_URI' => '/foo',
             'REQUEST_METHOD' => 'POST',
         ]);
-        $serverParams = $env->all();
-        $body = new RequestBody();
+        $stream = fopen('php://temp', 'w+');
+        stream_copy_to_stream(fopen('php://input', 'r'), $stream);
+        rewind($stream);
+        $body = new Stream($stream);
         $body->write($xml);
-        $this->request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
+        $request = new Request('POST', $uri, $headers, $cookies, $serverParams, $body);
+        $this->request = new ServerRequest($request);
         $this->response = new Response();
     }
 
@@ -115,20 +126,14 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             $mw = new Validation($expectedValidators, $expectedTranslator, $options);
         }
 
-        $errors = null;
-        $hasErrors = null;
-        $validators = null;
-        $translator = null;
-        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators, &$translator) {
-            $errors = $req->getAttribute('errors');
-            $hasErrors = $req->getAttribute('has_errors');
-            $validators = $req->getAttribute('validators');
-            $translator = $req->getAttribute('translator');
+        $handler = $this->setupHandler();
 
-            return $res;
-        };
+        $response = $mw($this->request, $handler);
 
-        $response = $mw($this->request, $this->response, $next);
+        $errors = $handler->getErrors();
+        $hasErrors = $handler->getHasErrors();
+        $validators = $handler->getValidators();
+        $translator = $handler->getTranslator();
 
         $this->assertEquals($expectedHasErrors, $hasErrors);
         $this->assertEquals($expectedErrors, $errors);
@@ -574,17 +579,6 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         );
         $mw = new Validation($expectedValidators);
 
-        $errors = null;
-        $hasErrors = null;
-        $validators = [];
-        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
-            $errors = $req->getAttribute('errors');
-            $hasErrors = $req->getAttribute('has_errors');
-            $validators = $req->getAttribute('validators');
-
-            return $res;
-        };
-
         $newUsernameValidator = v::alnum()->noWhitespace()->length(1, 10);
         $newAgeValidator = v::numeric()->positive()->between(1, 20);
         $newValidators = array(
@@ -594,7 +588,13 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
         $mw->setValidators($newValidators);
 
-        $response = $mw($this->request, $this->response, $next);
+        $handler = $this->setupHandler();
+
+        $response = $mw($this->request, $handler);
+
+        $errors = $handler->getErrors();
+        $hasErrors = $handler->getHasErrors();
+        $validators = $handler->getValidators();
 
         $expectedErrors = array(
           'username' => array(
@@ -630,19 +630,6 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
         $mw = new Validation($expectedValidators, $translator);
 
-        $errors = null;
-        $hasErrors = null;
-        $translator = null;
-        $validators = [];
-        $next = function ($req, $res) use (&$errors, &$hasErrors, &$translator, &$validators) {
-            $errors = $req->getAttribute('errors');
-            $hasErrors = $req->getAttribute('has_errors');
-            $validators = $req->getAttribute('validators');
-            $translator = $req->getAttribute('translator');
-
-            return $res;
-        };
-
         $newTranslator = function ($message) {
             $messages = [
               'These rules must pass for {{name}}' => 'Queste regole devono passare per {{name}} (nuovo)',
@@ -655,7 +642,14 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
 
         $mw->setTranslator($newTranslator);
 
-        $response = $mw($this->request, $this->response, $next);
+        $handler = $this->setupHandler();
+
+        $response = $mw($this->request, $handler);
+
+        $errors = $handler->getErrors();
+        $hasErrors = $handler->getHasErrors();
+        $validators = $handler->getValidators();
+        $translator = $handler->getTranslator();
 
         $this->assertTrue($hasErrors);
         $expectedErrors = array(
@@ -668,19 +662,6 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($newTranslator, $translator);
     }
 
-    public function requestFactory($envData = [])
-    {
-        $env = Environment::mock($envData);
-        $uri = Uri::createFromString('https://example.com:443/foo/bar?abc=123');
-        $headers = Headers::createFromEnvironment($env);
-        $cookies = [];
-        $serverParams = $env->all();
-        $body = new RequestBody();
-        $request = new Request('GET', $uri, $headers, $cookies, $serverParams, $body);
-
-        return $request;
-    }
-
     /**
      * Test for validation.
      *
@@ -689,28 +670,21 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
     public function testRouteParamValidation($expectedValidators, $expectedHasErrors, $expectedErrors, $attributes)
     {
         $this->setupGet();
-        $attrProp = new ReflectionProperty($this->request, 'attributes');
-        $attrProp->setAccessible(true);
-        $attrProp->setValue($this->request, new Collection(array('routeInfo' => array(
-          0,
-          1,
-          $attributes,
-        ))));
+        $this->request = $this->request->withAttribute('routeInfo', [
+            0,
+            1,
+          $attributes
+        ]);
 
         $mw = new Validation($expectedValidators);
 
-        $errors = null;
-        $hasErrors = null;
-        $validators = [];
-        $next = function ($req, $res) use (&$errors, &$hasErrors, &$validators) {
-            $errors = $req->getAttribute('errors');
-            $hasErrors = $req->getAttribute('has_errors');
-            $validators = $req->getAttribute('validators');
+        $handler = $this->setupHandler();
 
-            return $res;
-        };
+        $response = $mw($this->request, $handler);
 
-        $response = $mw($this->request, $this->response, $next);
+        $errors = $handler->getErrors();
+        $hasErrors = $handler->getHasErrors();
+        $validators = $handler->getValidators();
 
         $this->assertEquals($expectedValidators, $validators);
         $this->assertEquals($expectedHasErrors, $hasErrors);
@@ -746,5 +720,51 @@ class ValidationTest extends \PHPUnit_Framework_TestCase
             ['routeParam' => 'davidepastore'],
           ),
         );
+    }
+
+    /**
+     * Create a new RequestHandler that can pull necessary attributes from the $request after validation.
+     *
+     * @return RequestHandlerInterface
+     */
+    private function setupHandler() : RequestHandlerInterface
+    {
+        return new class implements RequestHandlerInterface {
+            protected $errors = null;
+            protected $hasErrors = null;
+            protected $translator = null;
+            protected $validators = [];
+
+            public function getErrors()
+            {
+                return $this->errors;
+            }
+            public function getHasErrors()
+            {
+                return $this->hasErrors;
+            }
+            public function getTranslator()
+            {
+                return $this->translator;
+            }
+            public function getValidators()
+            {
+                return $this->validators;
+            }
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                $getRequestAttributes = function ($req) {
+                    $this->errors = $req->getAttribute('errors');
+                    $this->hasErrors = $req->getAttribute('has_errors');
+                    $this->validators = $req->getAttribute('validators');
+                    $this->translator = $req->getAttribute('translator');
+                };
+
+                $getRequestAttributes($request);
+
+                return new Response();
+            }
+        };
     }
 }

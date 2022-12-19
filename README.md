@@ -31,7 +31,7 @@ Via Composer
 $ composer require davidepastore/slim-validation
 ```
 
-Requires Slim 3.0.0 or newer.
+Requires Slim 4.0.0 or newer.
 
 ## Usage
 
@@ -43,8 +43,11 @@ as it is middleware, you can also register it for all routes.
 
 ```php
 use Respect\Validation\Validator as v;
+use Slim\Factory\AppFactory;
 
-$app = new \Slim\App();
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = AppFactory::create();
 
 //Create the validators
 $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
@@ -84,8 +87,11 @@ $app->run();
 
 ```php
 use Respect\Validation\Validator as v;
+use Slim\Factory\AppFactory;
 
-$app = new \Slim\App();
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = AppFactory::create();
 
 //Create the validators
 $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
@@ -138,8 +144,11 @@ $app->run();
 
 ```php
 use Respect\Validation\Validator as v;
+use Slim\Factory\AppFactory;
 
-$app = new \Slim\App();
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = AppFactory::create();
 
 //Create the validators
 $routeParamValidator = v::numeric()->positive();
@@ -193,8 +202,11 @@ and you want to validate the `email.name` key. You can do it in this way:
 
 ```php
 use Respect\Validation\Validator as v;
+use Slim\Factory\AppFactory;
 
-$app = new \Slim\App();
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = AppFactory::create();
 
 //Create the validators
 $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
@@ -251,8 +263,11 @@ and you want to validate the `email.name` key. You can do it in this way:
 
 ```php
 use Respect\Validation\Validator as v;
+use Slim\Factory\AppFactory;
 
-$app = new \Slim\App();
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = AppFactory::create();
 
 //Create the validators
 $typeValidator = v::alnum()->noWhitespace()->length(3, 5);
@@ -292,8 +307,11 @@ You can provide a callable function to translate the errors.
 
 ```php
 use Respect\Validation\Validator as v;
+use Slim\Factory\AppFactory;
 
-$app = new \Slim\App();
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = AppFactory::create();
 
 //Create the validators
 $usernameValidator = v::alnum()->noWhitespace()->length(1, 10);
