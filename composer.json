@@ -3,6 +3,7 @@
     "description": "A slim middleware for validation based on Respect/Validation",
     "keywords": ["slim","framework","middleware","validation", "validator"],
     "type": "library",
+    "version": "4.0",
     "authors": [
         {
             "name": "Davide Pastore",
